@@ -19,3 +19,7 @@ go run opentelemetry/worker/main.go
 ```bash
 go run opentelemetry/starter/main.go
 ```
+
+Questions
+
+- Task Queues
