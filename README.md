@@ -9,6 +9,8 @@ One way could be just to use the Temporal CLI.
 temporal server start-dev
 ```
 
+UI http://localhost:8233
+
 2) Run the following command to start the worker
 ```bash
 go run opentelemetry/worker/main.go
