@@ -24,6 +24,26 @@ services:
       AWS_SECRET_ACCESS_KEY: local
     depends_on:
       - dynamodb-local
+  aws-cli:
+    image: amazon/aws-cli
+    depends_on:
+      - dynamodb-local
+    environment:
+      AWS_DEFAULT_PROFILE: dynamo-db-local
+      AWS_ENDPOINT: --endpoint-url=http://dynamodb-local:8000
+      AWS_ACCESS_KEY_ID: local
+      AWS_SECRET_ACCESS_KEY: local
+      METADATA_TABLE_NAME: local-asm-metadata
+      SERVICES_TABLE_NAME: local-asm-services
+    entrypoint: /bin/sh -c
+    volumes:
+      - './dynamodb-init:/init-scripts'
+    command: >
+      '
+       for script_name in /init-scripts/*.sh; do
+         sh $$script_name
+       done
+      '
   localstack:
     image: localstack/localstack:3.2.0
     ports:
