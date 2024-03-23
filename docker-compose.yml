@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  dynamodb-local:
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    image: "amazon/dynamodb-local:2.3.0"
+    container_name: dynamodb-local
+    ports:
+      - "8009:8000"
+    volumes:
+      - "./local_dynamodb_volume:/home/dynamodblocal/data"
+      - "./dynamodb-init:/docker-entrypoint-initdb.d"
+    working_dir: /home/dynamodblocal
+    expose:
+      - 8009
+  dynamodb-admin:
+    image: "aaronshaf/dynamodb-admin:4.6.1"
+    ports:
+      - "8001:8001"
+    environment:
+      DYNAMO_ENDPOINT: "http://dynamodb-local:8000"
+      AWS_REGION: "localhost"
+      AWS_ACCESS_KEY_ID: local
+      AWS_SECRET_ACCESS_KEY: local
+    depends_on:
+      - dynamodb-local
+  localstack:
+    image: localstack/localstack:3.2.0
+    ports:
+      - "4566:4566"
+    environment:
+      - DEBUG=1
+      - SERVICES=s3
+    volumes:
+      - ./localstack_volume:/var/lib/localstack
+      - ./localstack_init:/docker-entrypoint-initaws.d
+    expose:
+      - 4566

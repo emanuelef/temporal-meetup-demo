@@ -1,0 +1,5 @@
+{
+  "ID": { "S": "123" },
+  "Name": { "S": "Example Item" },
+  "Description": { "S": "This is an example item" }
+}

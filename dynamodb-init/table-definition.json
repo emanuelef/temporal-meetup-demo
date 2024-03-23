@@ -1,0 +1,13 @@
+{
+  "TableName": "ExampleTable",
+  "KeySchema": [
+    { "AttributeName": "ID", "KeyType": "HASH" }
+  ],
+  "AttributeDefinitions": [
+    { "AttributeName": "ID", "AttributeType": "S" }
+  ],
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 5,
+    "WriteCapacityUnits": 5
+  }
+}
