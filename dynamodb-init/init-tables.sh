@@ -21,6 +21,6 @@ echo "Waiting for table creation..."
 sleep 5
 
 # Populate DynamoDB table with item
-aws $AWS_ENDPOINT dynamodb put-item --table-name ExampleTable --item file:///init-scripts/items.json
+aws $AWS_ENDPOINT dynamodb put-item --table-name Services --item file:///init-scripts/items.json
 
 echo "DynamoDB tables created and populated successfully"

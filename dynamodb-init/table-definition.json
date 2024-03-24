@@ -1,5 +1,5 @@
 {
-  "TableName": "ExampleTable",
+  "TableName": "Services",
   "KeySchema": [
     { "AttributeName": "ID", "KeyType": "HASH" }
   ],

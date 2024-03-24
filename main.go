@@ -121,27 +121,20 @@ func (c *DynamoDBClient) GetItem(key map[string]types.AttributeValue) (map[strin
 }
 
 func main() {
-	client, err := NewDynamoDBClient("YourTableName")
+	dynamoClient, err := NewDynamoDBClient("Services")
 	if err != nil {
 		log.Fatalf("error creating DynamoDB client: %v", err)
 	}
 
-	item := map[string]types.AttributeValue{
-		"Key": &types.AttributeValueMemberS{Value: "Value"},
-	}
+	partiQLStatement := "INSERT INTO Services VALUE { 'ID': 'example-id', 'Name': 'Example Service' }"
 
-	if err := client.PutItem(item); err != nil {
-		log.Fatalf("error putting item: %v", err)
-	}
-
-	key := map[string]types.AttributeValue{
-		"Key": &types.AttributeValueMemberS{Value: "Value"},
-	}
-
-	result, err := client.GetItem(key)
+	// Execute the PartiQL statement
+	output, err := dynamoClient.client.ExecuteStatement(context.TODO(), &dynamodb.ExecuteStatementInput{
+		Statement: aws.String(partiQLStatement),
+	})
 	if err != nil {
-		log.Fatalf("error getting item: %v", err)
+		panic(fmt.Sprintf("unable to execute PartiQL statement, %v", err))
 	}
 
-	fmt.Println("Retrieved Item:", result)
+	fmt.Println("Item added successfully:", output)
 }
