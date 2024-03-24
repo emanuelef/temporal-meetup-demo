@@ -1,4 +1,4 @@
-package opentelemetry
+package workflow
 
 import (
 	"context"
@@ -16,7 +16,7 @@ var tracer trace.Tracer
 
 func init() {
 	// Name the tracer after the package, or the service if you are in main
-	tracer = otel.Tracer("github.com/emanuelef/temporal-meetup-demo/otel")
+	tracer = otel.Tracer("github.com/emanuelef/temporal-meetup-demo")
 }
 
 func Workflow(ctx workflow.Context, name string) error {
