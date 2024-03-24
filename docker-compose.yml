@@ -9,7 +9,6 @@ services:
       - "8009:8000"
     volumes:
       - "./local_dynamodb_volume:/home/dynamodblocal/data"
-      - "./dynamodb-init:/docker-entrypoint-initdb.d"
     working_dir: /home/dynamodblocal
     expose:
       - 8009
@@ -53,6 +52,7 @@ services:
       - SERVICES=s3
     volumes:
       - ./localstack_volume:/var/lib/localstack
-      - ./localstack_init:/docker-entrypoint-initaws.d
+      - ./localstack_init/files:/files
+      - ./localstack_init/s3.sh:/etc/localstack/init/ready.d/init-aws.sh
     expose:
       - 4566

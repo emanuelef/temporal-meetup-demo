@@ -1,5 +1,4 @@
 FROM golang:1.22.1-alpine as builder
-ARG ERDK_PAT
 WORKDIR /app
 COPY src ./src
 COPY go.mod .
