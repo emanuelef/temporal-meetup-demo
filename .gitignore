@@ -6,3 +6,5 @@ local_dynamodb_volume/*
 localstack_volume/*
 .vscode/
 .DS_Store
+tmp/main
+tmp/build-errors.log

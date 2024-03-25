@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"slices"
 	"sync"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -19,6 +20,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-sdk-go-v2/otelaws"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const (
@@ -117,7 +120,13 @@ func (c *DynamoDBClient) GetItem(key map[string]types.AttributeValue) (map[strin
 	return output.Item, nil
 }
 
+var tracer trace.Tracer
+
 var notToLogEndpoints = []string{"/health", "/metrics"}
+
+func init() {
+	tracer = otel.Tracer("github.com/emanuelef/go-gin-honeycomb")
+}
 
 func FilterTraces(req *http.Request) bool {
 	return slices.Index(notToLogEndpoints, req.URL.Path) == -1
@@ -146,6 +155,13 @@ func main() {
 	// Just to check health and an example of a very frequent request
 	// that we might not want to generate traces
 	r.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusNoContent, gin.H{})
+	})
+
+	r.GET("/hello", func(c *gin.Context) {
+		_, childSpan := tracer.Start(c.Request.Context(), "custom-child-span")
+		time.Sleep(10 * time.Millisecond) // simulate some work
+		childSpan.End()
 		c.JSON(http.StatusNoContent, gin.H{})
 	})
 
