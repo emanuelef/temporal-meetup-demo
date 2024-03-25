@@ -1,4 +1,4 @@
-package opentelemetry
+package otel_instrumentation
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 )
 
-func InitializeGlobalTracerProvider(ctx context.Context) (*sdktrace.TracerProvider, error) {
+func InitializeGlobalTracerProvider(ctx context.Context) (*sdktrace.TracerProvider, *otlptrace.Exporter, error) {
 	// Initialize tracer
 	clientOTel := otlptracegrpc.NewClient()
 	exp, err := otlptrace.New(ctx, clientOTel)
@@ -31,6 +31,7 @@ func InitializeGlobalTracerProvider(ctx context.Context) (*sdktrace.TracerProvid
 	)
 	otel.SetTracerProvider(tp)
 
+	// Register the W3C trace context and baggage propagators so data is propagated across services/processes
 	otel.SetTextMapPropagator(
 		propagation.NewCompositeTextMapPropagator(
 			propagation.TraceContext{},
@@ -38,5 +39,5 @@ func InitializeGlobalTracerProvider(ctx context.Context) (*sdktrace.TracerProvid
 		),
 	)
 
-	return tp, nil
+	return tp, exp, nil
 }

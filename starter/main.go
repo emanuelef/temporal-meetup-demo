@@ -5,7 +5,7 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 	"log"
 
-	otel "github.com/emanuelef/temporal-meetup-demo/otel"
+	"github.com/emanuelef/temporal-meetup-demo/otel_instrumentation"
 	workflow "github.com/emanuelef/temporal-meetup-demo/workflow"
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/contrib/opentelemetry"
@@ -16,7 +16,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	tp, err := otel.InitializeGlobalTracerProvider(ctx)
+	tp, _, err := otel_instrumentation.InitializeGlobalTracerProvider(ctx)
 	if err != nil {
 		log.Fatalln("Unable to create a global trace provider", err)
 	}
