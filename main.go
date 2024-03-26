@@ -81,22 +81,4 @@ func main() {
 	if err != nil {
 		log.Printf("Starting router failed, %v", err)
 	}
-	/*
-		dynamoClient, err := NewDynamoDBClient("Services")
-		if err != nil {
-			log.Fatalf("error creating DynamoDB client: %v", err)
-		}
-
-		partiQLStatement := "INSERT INTO Services VALUE { 'ID': 'example-id', 'Name': 'Example Service' }"
-
-		// Execute the PartiQL statement
-		output, err := dynamoClient.client.ExecuteStatement(context.TODO(), &dynamodb.ExecuteStatementInput{
-			Statement: aws.String(partiQLStatement),
-		})
-		if err != nil {
-			panic(fmt.Sprintf("unable to execute PartiQL statement, %v", err))
-		}
-
-		fmt.Println("Item added successfully:", output)
-	*/
 }

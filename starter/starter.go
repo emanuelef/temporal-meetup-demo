@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"sync"
+	"time"
 
 	_ "github.com/joho/godotenv/autoload"
 	"go.opentelemetry.io/otel/attribute"
@@ -13,6 +14,7 @@ import (
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/contrib/opentelemetry"
 	"go.temporal.io/sdk/interceptor"
+	"go.temporal.io/sdk/temporal"
 )
 
 var (
@@ -70,9 +72,17 @@ func (c *TemporalClient) StartWorkflow(ctx context.Context) error {
 
 	span.AddEvent("Done Activity")
 
+	retrypolicy := &temporal.RetryPolicy{
+		InitialInterval:    time.Second,
+		BackoffCoefficient: 2.0,
+		MaximumInterval:    time.Second * 100,
+	}
+
 	workflowOptions := client.StartWorkflowOptions{
-		ID:        "otel_workflowID",
-		TaskQueue: "otel",
+		ID:                 "otel_workflowID",
+		TaskQueue:          "otel",
+		RetryPolicy:        retrypolicy,
+		WorkflowRunTimeout: 6 * time.Minute,
 	}
 
 	we, err := c.client.ExecuteWorkflow(ctx, workflowOptions, workflow.Workflow, "Temporal")

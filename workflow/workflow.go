@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/emanuelef/temporal-meetup-demo/dynamo"
 	_ "github.com/joho/godotenv/autoload"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -24,7 +25,8 @@ func Workflow(ctx workflow.Context, name string) error {
 	logger.Info("HelloWorld workflow started", "name", name)
 
 	ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
-		StartToCloseTimeout: 10 * time.Second,
+		StartToCloseTimeout: 3 * time.Minute,
+		HeartbeatTimeout:    10 * time.Second,
 	})
 
 	err := workflow.ExecuteActivity(ctx, Activity).Get(ctx, nil)
@@ -47,8 +49,20 @@ func Activity(ctx context.Context, name string) error {
 
 	// Create a child span
 	_, childSpan := tracer.Start(ctx, "custom-span")
-	time.Sleep(1 * time.Second)
+	time.Sleep(11 * time.Second)
 	childSpan.End()
+
+	dynamoClient, err := dynamo.NewDynamoDBClient("ciao")
+
+	if err != nil {
+		return err
+	}
+
+	_, err = dynamoClient.ListItems(ctx)
+
+	if err != nil {
+		return err
+	}
 
 	time.Sleep(1 * time.Second)
 

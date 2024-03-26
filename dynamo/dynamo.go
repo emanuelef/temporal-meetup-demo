@@ -97,16 +97,17 @@ func (c *DynamoDBClient) PutItem(item map[string]types.AttributeValue) error {
 	return nil
 }
 
-func (c *DynamoDBClient) GetItem(key map[string]types.AttributeValue) (map[string]types.AttributeValue, error) {
-	input := &dynamodb.GetItemInput{
-		TableName: &c.table,
-		Key:       key,
-	}
+func (c *DynamoDBClient) ListItems(ctx context.Context) ([]string, error) {
+	query := fmt.Sprintf("SELECT %s FROM %q WHERE %s = '%s'",
+		"ID", "Services",
+		"ID", "1")
+	_, err := c.client.ExecuteStatement(ctx, &dynamodb.ExecuteStatementInput{
+		Statement: aws.String(query),
+	})
 
-	output, err := c.client.GetItem(context.TODO(), input)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get item: %v", err)
+		return nil, err
 	}
 
-	return output.Item, nil
+	return []string{}, nil
 }
