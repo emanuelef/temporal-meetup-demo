@@ -30,13 +30,11 @@ func FilterTraces(req *http.Request) bool {
 }
 
 func main() {
-
 	ctx := context.Background()
 
 	tp, exp, err := otel_instrumentation.InitializeGlobalTracerProvider(ctx)
-
 	if err != nil {
-		log.Fatalf("error creating OTeL instrimentation: %v", err)
+		log.Fatalf("error creating OTeL instrumentation: %v", err)
 	}
 
 	defer func() {
@@ -47,6 +45,7 @@ func main() {
 	r := gin.New()
 
 	r.Use(gin.Recovery())
+	r.Use(gin.Logger())
 	r.Use(otelgin.Middleware("my-server", otelgin.WithFilter(FilterTraces)))
 
 	// Just to check health and an example of a very frequent request
@@ -63,8 +62,9 @@ func main() {
 	})
 
 	r.GET("/start", func(c *gin.Context) {
-		err := starter.StartWorkflow(c.Request.Context())
+		clientTemporal, _ := starter.NewTemporalClient(c.Request.Context())
 
+		err = clientTemporal.StartWorkflow(c.Request.Context())
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return

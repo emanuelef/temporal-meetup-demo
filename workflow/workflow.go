@@ -28,7 +28,6 @@ func Workflow(ctx workflow.Context, name string) error {
 	})
 
 	err := workflow.ExecuteActivity(ctx, Activity).Get(ctx, nil)
-
 	if err != nil {
 		logger.Error("Activity failed.", "Error", err)
 		return err
