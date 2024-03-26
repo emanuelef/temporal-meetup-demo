@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/emanuelef/temporal-meetup-demo/otel_instrumentation"
+	"github.com/emanuelef/temporal-meetup-demo/starter"
 	"github.com/emanuelef/temporal-meetup-demo/utils"
 	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
@@ -58,6 +59,17 @@ func main() {
 		_, childSpan := tracer.Start(c.Request.Context(), "custom-child-span")
 		time.Sleep(10 * time.Millisecond) // simulate some work
 		childSpan.End()
+		c.JSON(http.StatusNoContent, gin.H{})
+	})
+
+	r.GET("/start", func(c *gin.Context) {
+		err := starter.StartWorkflow(c.Request.Context())
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
 		c.JSON(http.StatusNoContent, gin.H{})
 	})
 
