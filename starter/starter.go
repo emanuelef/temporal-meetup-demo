@@ -2,6 +2,7 @@ package starter
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 
+	"github.com/emanuelef/temporal-meetup-demo/utils"
 	workflow "github.com/emanuelef/temporal-meetup-demo/workflow"
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/contrib/opentelemetry"
@@ -78,8 +80,10 @@ func (c *TemporalClient) StartWorkflow(ctx context.Context) error {
 		MaximumInterval:    time.Second * 100,
 	}
 
+	temporalWorkflowId := fmt.Sprintf("service-%s", utils.GenerateUUID())
+
 	workflowOptions := client.StartWorkflowOptions{
-		ID:                 "otel_workflowID",
+		ID:                 temporalWorkflowId,
 		TaskQueue:          "otel",
 		RetryPolicy:        retrypolicy,
 		WorkflowRunTimeout: 6 * time.Minute,

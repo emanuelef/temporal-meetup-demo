@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/emanuelef/temporal-meetup-demo/dynamo"
-	"github.com/emanuelef/temporal-meetup-demo/s3"
+	//"github.com/emanuelef/temporal-meetup-demo/dynamo"
+	//"github.com/emanuelef/temporal-meetup-demo/s3"
 	_ "github.com/joho/godotenv/autoload"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -27,7 +27,7 @@ func Workflow(ctx workflow.Context, name string) error {
 
 	ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
 		StartToCloseTimeout: 3 * time.Minute,
-		HeartbeatTimeout:    10 * time.Second,
+		// HeartbeatTimeout:    10 * time.Second,
 	})
 
 	err := workflow.ExecuteActivity(ctx, Activity).Get(ctx, nil)
@@ -53,6 +53,7 @@ func Activity(ctx context.Context, name string) error {
 	time.Sleep(11 * time.Second)
 	childSpan.End()
 
+	/*
 	dynamoClient, err := dynamo.NewDynamoDBClient("ciao")
 
 	if err != nil {
@@ -65,19 +66,27 @@ func Activity(ctx context.Context, name string) error {
 		return err
 	}
 
-	time.Sleep(1 * time.Second)
+	*/
 
-	s3Client, err := s3.NewS3Client("ciao")
+	/*
 
-	if err != nil {
-		return err
-	}
+		time.Sleep(1 * time.Second)
 
-	_, err = s3Client.ListScripts(ctx)
+		_, err = s3.NewS3Client("ciao")
 
-	if err != nil {
-		return err
-	}
+		if err != nil {
+			return err
+		}
+
+	*/
+
+	/*
+		_, err = s3Client.ListScripts(ctx)
+
+		if err != nil {
+			return err
+		}
+	*/
 
 	// Add an event to the current span
 	span.AddEvent("Done Activity")

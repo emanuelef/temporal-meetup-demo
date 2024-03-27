@@ -1,6 +1,10 @@
 package utils
 
-import "os"
+import (
+	"os"
+
+	"github.com/google/uuid"
+)
 
 func GetEnv(envVar, defaultValue string) string {
 	val, exists := os.LookupEnv(envVar)
@@ -8,4 +12,9 @@ func GetEnv(envVar, defaultValue string) string {
 		return defaultValue
 	}
 	return val
+}
+
+func GenerateUUID() string {
+	id := uuid.New()
+	return id.String()
 }
