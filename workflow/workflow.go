@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/emanuelef/temporal-meetup-demo/dynamo"
+	"github.com/emanuelef/temporal-meetup-demo/s3"
 	_ "github.com/joho/godotenv/autoload"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -65,6 +66,18 @@ func Activity(ctx context.Context, name string) error {
 	}
 
 	time.Sleep(1 * time.Second)
+
+	s3Client, err := s3.NewS3Client("ciao")
+
+	if err != nil {
+		return err
+	}
+
+	_, err = s3Client.ListScripts(ctx)
+
+	if err != nil {
+		return err
+	}
 
 	// Add an event to the current span
 	span.AddEvent("Done Activity")
