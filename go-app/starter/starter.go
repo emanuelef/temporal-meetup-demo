@@ -19,6 +19,8 @@ import (
 	"go.temporal.io/sdk/temporal"
 )
 
+const TASK_QUEUE = "MeetupExample"
+
 var (
 	once     sync.Once
 	instance *TemporalClient
@@ -68,11 +70,9 @@ func NewTemporalClient(ctx context.Context) (*TemporalClient, error) {
 	return instance, nil
 }
 
-func (c *TemporalClient) StartWorkflow(ctx context.Context) error {
+func (c *TemporalClient) StartWorkflow(ctx context.Context) (string, error) {
 	span := trace.SpanFromContext(ctx)
 	span.SetAttributes(attribute.Bool("isTrue", true), attribute.String("stringAttr", "Ciao"))
-
-	span.AddEvent("Done Activity")
 
 	retrypolicy := &temporal.RetryPolicy{
 		InitialInterval:    time.Second,
@@ -84,7 +84,7 @@ func (c *TemporalClient) StartWorkflow(ctx context.Context) error {
 
 	workflowOptions := client.StartWorkflowOptions{
 		ID:                 temporalWorkflowId,
-		TaskQueue:          "otel",
+		TaskQueue:          TASK_QUEUE,
 		RetryPolicy:        retrypolicy,
 		WorkflowRunTimeout: 6 * time.Minute,
 	}
@@ -93,19 +93,21 @@ func (c *TemporalClient) StartWorkflow(ctx context.Context) error {
 	if err != nil {
 		log.Println("Unable to execute workflow", err)
 		span.AddEvent("Unable to execute workflow")
-		return err
+		return "", err
 	}
 
 	log.Println("Started workflow", "WorkflowID", we.GetID(), "RunID", we.GetRunID())
 
+	span.AddEvent("Started workflow")
+
 	// Synchronously wait for the workflow completion.
-	var result string
-	err = we.Get(context.Background(), &result)
-	if err != nil {
-		log.Println("Unable get workflow result", err)
-		span.AddEvent("Unable get workflow result")
-		return err
-	}
-	log.Println("Workflow result:", result)
-	return nil
+	/* 	var result string
+	   	err = we.Get(context.Background(), &result)
+	   	if err != nil {
+	   		log.Println("Unable get workflow result", err)
+	   		span.AddEvent("Unable get workflow result")
+	   		return "", err
+	   	}
+	   	log.Println("Workflow result:", result) */
+	return we.GetID(), nil
 }

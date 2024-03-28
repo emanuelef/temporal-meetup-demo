@@ -64,13 +64,13 @@ func main() {
 	r.GET("/start", func(c *gin.Context) {
 		clientTemporal, _ := starter.NewTemporalClient(c.Request.Context())
 
-		err = clientTemporal.StartWorkflow(c.Request.Context())
+		workflowID, err := clientTemporal.StartWorkflow(c.Request.Context())
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		c.JSON(http.StatusNoContent, gin.H{})
+		c.JSON(http.StatusAccepted, gin.H{"workflowID": workflowID})
 	})
 
 	host := utils.GetEnv("HOST", "localhost")

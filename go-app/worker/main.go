@@ -13,6 +13,8 @@ import (
 	"go.temporal.io/sdk/worker"
 )
 
+const TASK_QUEUE = "MeetupExample"
+
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -44,7 +46,7 @@ func main() {
 	}
 	defer c.Close()
 
-	w := worker.New(c, "otel", worker.Options{})
+	w := worker.New(c, TASK_QUEUE, worker.Options{})
 
 	w.RegisterWorkflow(workflow.Workflow)
 	w.RegisterActivity(workflow.Activity)
