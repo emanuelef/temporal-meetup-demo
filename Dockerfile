@@ -1,6 +1,6 @@
 FROM golang:1.22.1-alpine as builder
 WORKDIR /app
-COPY src ./src
+COPY go-app ./src
 COPY go.mod .
 COPY go.sum .
 RUN apk update && apk upgrade && \
@@ -13,4 +13,4 @@ ENV GIN_MODE=release
 WORKDIR /app
 COPY --from=builder /app/advanced-services-management .
 EXPOSE 8080
-ENTRYPOINT ["./advanced-services-management"]
+ENTRYPOINT ["./go-app"]
