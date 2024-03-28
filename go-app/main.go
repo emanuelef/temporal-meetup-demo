@@ -8,9 +8,9 @@ import (
 	"slices"
 	"time"
 
-	"github.com/emanuelef/temporal-meetup-demo/otel_instrumentation"
-	"github.com/emanuelef/temporal-meetup-demo/starter"
-	"github.com/emanuelef/temporal-meetup-demo/utils"
+	"github.com/emanuelef/temporal-meetup-demo/go-app/otel_instrumentation"
+	"github.com/emanuelef/temporal-meetup-demo/go-app/starter"
+	"github.com/emanuelef/temporal-meetup-demo/go-app/utils"
 	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"go.opentelemetry.io/otel"

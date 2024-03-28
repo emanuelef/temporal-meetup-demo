@@ -11,8 +11,8 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/emanuelef/temporal-meetup-demo/utils"
-	workflow "github.com/emanuelef/temporal-meetup-demo/workflow"
+	"github.com/emanuelef/temporal-meetup-demo/go-app/utils"
+	workflow "github.com/emanuelef/temporal-meetup-demo/go-app/workflow"
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/contrib/opentelemetry"
 	"go.temporal.io/sdk/interceptor"

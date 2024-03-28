@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/emanuelef/temporal-meetup-demo/otel_instrumentation"
-	workflow "github.com/emanuelef/temporal-meetup-demo/workflow"
+	"github.com/emanuelef/temporal-meetup-demo/go-app/otel_instrumentation"
+	workflow "github.com/emanuelef/temporal-meetup-demo/go-app/workflow"
 	_ "github.com/joho/godotenv/autoload"
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/contrib/opentelemetry"
