@@ -104,7 +104,6 @@ func (c *DynamoDBClient) ListItems(ctx context.Context) ([]string, error) {
 	_, err := c.client.ExecuteStatement(ctx, &dynamodb.ExecuteStatementInput{
 		Statement: aws.String(query),
 	})
-
 	if err != nil {
 		return nil, err
 	}

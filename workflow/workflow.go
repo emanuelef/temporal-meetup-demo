@@ -54,17 +54,17 @@ func Activity(ctx context.Context, name string) error {
 	childSpan.End()
 
 	/*
-	dynamoClient, err := dynamo.NewDynamoDBClient("ciao")
+		dynamoClient, err := dynamo.NewDynamoDBClient("ciao")
 
-	if err != nil {
-		return err
-	}
+		if err != nil {
+			return err
+		}
 
-	_, err = dynamoClient.ListItems(ctx)
+		_, err = dynamoClient.ListItems(ctx)
 
-	if err != nil {
-		return err
-	}
+		if err != nil {
+			return err
+		}
 
 	*/
 

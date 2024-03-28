@@ -53,7 +53,7 @@ func NewTemporalClient(ctx context.Context) (*TemporalClient, error) {
 			span.AddEvent("Unable to create client")
 			return
 		}
-		//defer c.Close()
+		// defer c.Close()
 
 		instance = &TemporalClient{
 			client: c,
