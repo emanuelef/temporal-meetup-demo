@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	//"github.com/emanuelef/temporal-meetup-demo/dynamo"
-	//"github.com/emanuelef/temporal-meetup-demo/s3"
+	"github.com/emanuelef/temporal-meetup-demo/go-app/dynamo"
+	"github.com/emanuelef/temporal-meetup-demo/go-app/s3"
 	_ "github.com/joho/godotenv/autoload"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -53,32 +53,25 @@ func Activity(ctx context.Context, name string) error {
 	time.Sleep(11 * time.Second)
 	childSpan.End()
 
-	/*
-		dynamoClient, err := dynamo.NewDynamoDBClient("ciao")
+	dynamoClient, err := dynamo.NewDynamoDBClient(ctx, "ciao")
 
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		return err
+	}
 
-		_, err = dynamoClient.ListItems(ctx)
+	_, err = dynamoClient.ListItems(ctx)
 
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		return err
+	}
 
-	*/
+/* 	time.Sleep(1 * time.Second)
 
-	/*
+	_, err = s3.NewS3Client(ctx, "ciao")
 
-		time.Sleep(1 * time.Second)
-
-		_, err = s3.NewS3Client("ciao")
-
-		if err != nil {
-			return err
-		}
-
-	*/
+	if err != nil {
+		return err
+	} */
 
 	/*
 		_, err = s3Client.ListScripts(ctx)

@@ -13,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/emanuelef/temporal-meetup-demo/go-app/utils"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-sdk-go-v2/otelaws"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const (
@@ -56,9 +57,11 @@ func buildLocalConfiguration() (cfg aws.Config, err error) {
 	return cfg, err
 }
 
-func NewDynamoDBClient(table string) (*DynamoDBClient, error) {
+func NewDynamoDBClient(ctx context.Context, table string) (*DynamoDBClient, error) {
 	var err error
+	span := trace.SpanFromContext(ctx)
 	once.Do(func() {
+		span.AddEvent("First initialization of the DynamoDB client")
 		cfg, loadErr := buildLocalConfiguration()
 
 		otelaws.AppendMiddlewares(&cfg.APIOptions)
