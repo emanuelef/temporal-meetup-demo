@@ -12,3 +12,4 @@ rust-app/target
 .rustfmt.toml
 build.rs
 *.rs.bk
+target/

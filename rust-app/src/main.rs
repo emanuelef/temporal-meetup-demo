@@ -1,5 +1,9 @@
 use actix_web::{get, middleware::Logger, web, App, HttpResponse, HttpServer, Responder};
 use serde::Serialize;
+use opentelemetry::global::ObjectSafeSpan;
+use opentelemetry::trace::{SpanKind, Status};
+use opentelemetry::sdk::trace::TracerProvider;
+use opentelemetry::{global, sdk::propagation::TraceContextPropagator, trace::Tracer};
 
 #[derive(Debug, Serialize)]
 struct GreetResponse {
@@ -19,6 +23,14 @@ async fn greet(name: web::Path<String>) -> impl Responder {
     };
 
     HttpResponse::Ok().json(serde_json::json!(response))
+}
+
+fn init_tracer() {
+    global::set_text_map_propagator(TraceContextPropagator::new());
+    let provider = TracerProvider::builder()
+        .with_simple_exporter(SpanExporter::default())
+        .build();
+    global::set_tracer_provider(provider);
 }
 
 #[actix_web::main]
