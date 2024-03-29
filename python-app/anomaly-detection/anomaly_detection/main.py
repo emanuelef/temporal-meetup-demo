@@ -16,6 +16,7 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import (
     BatchSpanProcessor,
 )
+from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 from dotenv import load_dotenv
 
 load_dotenv() 
@@ -35,6 +36,8 @@ tracer = trace.get_tracer("my.tracer.name")
 app = FastAPI()
 app.add_middleware(GZipMiddleware, minimum_size=0)  # Compress all responses
 FastAPIInstrumentor.instrument_app(app)
+
+HTTPXClientInstrumentor().instrument()
 
 # CORS (Cross-Origin Resource Sharing) middleware
 app.add_middleware(
@@ -62,10 +65,12 @@ async def root():
 
 @app.get("/predict")
 async def predict(repo: str):
+    current_span = trace.get_current_span()
     # Check if the data is already in the cache
     if repo in cache:
         cached_data = cache[repo]
         print("Returning cached data.")
+        current_span.add_event("Cache it!")
         return JSONResponse(content=cached_data)
 
     api_url = f"http://143.47.226.125:8080/allStars?repo={repo}"
@@ -78,6 +83,7 @@ async def predict(repo: str):
 
     # Creating a DataFrame
     df = pd.DataFrame(stars_data, columns=["ds", "y", "y2"])
+    current_span.add_event("Created Dataframe")
 
     # Converting the 'ds' column to datetime format
     df["ds"] = pd.to_datetime(df["ds"], format="%d-%m-%Y")
@@ -93,6 +99,7 @@ async def predict(repo: str):
     # print(future.tail())
 
     forecast = m.predict(future)
+    current_span.add_event("Computed forecast")
 
     forecast["ds"] = forecast["ds"].dt.strftime("%Y-%m-%d")
 
