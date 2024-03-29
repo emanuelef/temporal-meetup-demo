@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"os"
 	"strings"
 	"sync"
 
@@ -11,11 +12,12 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/emanuelef/temporal-meetup-demo/go-app/utils"
+	_ "github.com/joho/godotenv/autoload"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-sdk-go-v2/otelaws"
 	"go.opentelemetry.io/otel/trace"
 )
 
-var SCRIPTS_S3_BUCKET = utils.GetEnv("SCRIPTS_S3_BUCKET", "local-asm-bucket")
+var SCRIPTS_S3_BUCKET = utils.GetEnv("SCRIPTS_S3_BUCKET", "scripts-local")
 
 const (
 	DEFAULT_LOCALSTACK_HOST = "localhost"
@@ -34,6 +36,13 @@ type S3Client struct {
 
 func buildLocalConfiguration() (cfg aws.Config, err error) {
 	const defaultRegion = "us-east-1"
+
+	envVarValue := os.Getenv("AWS_ACCESS_KEY_ID")
+	if envVarValue == "" {
+		fmt.Println("Environment variable not set or empty")
+	} else {
+		fmt.Printf("Value of environment variable: %s\n", envVarValue)
+	}
 
 	host := utils.GetEnv("LOCALSTACK_HOST", DEFAULT_LOCALSTACK_HOST)
 	port := utils.GetEnv("LOCALSTACK_PORT", DEFAULT_LOCALSTACK_PORT)

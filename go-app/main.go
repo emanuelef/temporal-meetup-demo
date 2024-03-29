@@ -12,6 +12,7 @@ import (
 	"github.com/emanuelef/temporal-meetup-demo/go-app/starter"
 	"github.com/emanuelef/temporal-meetup-demo/go-app/utils"
 	"github.com/gin-gonic/gin"
+	_ "github.com/joho/godotenv/autoload"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
