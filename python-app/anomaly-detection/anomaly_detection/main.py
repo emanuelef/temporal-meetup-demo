@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.middleware.gzip import GZipMiddleware
@@ -35,10 +36,6 @@ app = FastAPI()
 app.add_middleware(GZipMiddleware, minimum_size=0)  # Compress all responses
 FastAPIInstrumentor.instrument_app(app)
 
-import os
-env_var_value = os.environ.get('OTEL_SERVICE_NAME')
-print(env_var_value)
-
 # CORS (Cross-Origin Resource Sharing) middleware
 app.add_middleware(
     CORSMiddleware,
@@ -54,6 +51,12 @@ cache = TTLCache(maxsize=1000, ttl=864000)
 
 @app.get("/health")
 async def root():
+    current_span = trace.get_current_span()
+    current_span.set_attribute("operation.value", 1)
+    current_span.add_event("Gonna try it!")
+    with tracer.start_as_current_span("span-name") as span:
+        span.add_event("Gonna try it!")
+        await asyncio.sleep(2)
     return {"message": "Ciao"}
 
 
