@@ -23,3 +23,7 @@ go run opentelemetry/starter/main.go
 Questions
 
 - Task Queues
+
+```
+awslocal s3api list-buckets
+```

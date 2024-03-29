@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/emanuelef/temporal-meetup-demo/go-app/dynamo"
-	//"github.com/emanuelef/temporal-meetup-demo/go-app/s3"
+	"github.com/emanuelef/temporal-meetup-demo/go-app/s3"
 	_ "github.com/joho/godotenv/autoload"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
@@ -32,13 +32,13 @@ func Workflow(ctx workflow.Context, name string) error {
 		// HeartbeatTimeout:    10 * time.Second,
 	})
 
-/* 	err := workflow.ExecuteActivity(ctx, Activity).Get(ctx, nil)
+	err := workflow.ExecuteActivity(ctx, Activity).Get(ctx, nil)
 	if err != nil {
 		logger.Error("Activity failed.", "Error", err)
 		return err
-	} */
+	}
 
-	err := workflow.ExecuteActivity(ctx, SecondActivity).Get(ctx, nil)
+	err = workflow.ExecuteActivity(ctx, SecondActivity).Get(ctx, nil)
 	if err != nil {
 		logger.Error("Second Activity failed.", "Error", err)
 		return err
@@ -73,22 +73,6 @@ func Activity(ctx context.Context, name string) error {
 		return err
 	}
 
-	/* 	time.Sleep(1 * time.Second)
-
-	   	_, err = s3.NewS3Client(ctx, "ciao")
-
-	   	if err != nil {
-	   		return err
-	   	} */
-
-	/*
-		_, err = s3Client.ListScripts(ctx)
-
-		if err != nil {
-			return err
-		}
-	*/
-
 	// Add an event to the current span
 	span.AddEvent("Done Activity")
 
@@ -107,6 +91,20 @@ func SecondActivity(ctx context.Context, name string) error {
 	}
 
 	_, _ = io.ReadAll(resp.Body)
+
+	time.Sleep(1 * time.Second)
+
+	s3Client, err := s3.NewS3Client(ctx, "ciao")
+
+	if err != nil {
+		return err
+	}
+
+	_, err = s3Client.ListScripts(ctx)
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

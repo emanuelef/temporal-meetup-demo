@@ -39,7 +39,6 @@ func main() {
 		Interceptors: []interceptor.ClientInterceptor{tracingInterceptor},
 	}
 
-	// The client and worker are heavyweight objects that should be created once per process.
 	c, err := client.Dial(options)
 	if err != nil {
 		log.Fatalln("Unable to create client", err)
