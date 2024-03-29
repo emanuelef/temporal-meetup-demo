@@ -1,84 +1,96 @@
-use actix_web::{get, middleware::Logger, web, App, HttpResponse, HttpServer, Responder};
-use serde::Serialize;
-use std::env;
-use std::time::Duration;
+use actix_web::{web, App, HttpResponse, HttpServer};
+use std::{io, str::FromStr, env};
+use tracing::{debug, info};
+use tracing_actix_web::TracingLogger;
+use tracing_subscriber::prelude::*;
 use dotenv::dotenv;
-use opentelemetry::trace::TraceError;
-use opentelemetry::global;
-use opentelemetry_sdk::{propagation::TraceContextPropagator, resource::{
-    OsResourceDetector, ProcessResourceDetector, ResourceDetector,
-    EnvResourceDetector, TelemetryResourceDetector,
-    SdkProvidedResourceDetector,
-}, runtime, trace as sdktrace};
-use opentelemetry_otlp::{self, WithExportConfig};
-
-#[derive(Debug, Serialize)]
-struct GreetResponse {
-    message: String,
-}
-
-#[get("/health")]
-async fn health() -> impl Responder {
-    HttpResponse::Ok().body("OK")
-}
-
-#[get("/hello/{name}")]
-async fn greet(name: web::Path<String>) -> impl Responder {
-    log::warn!("<---- /hello, name: {}", name);
-    let response = GreetResponse {
-        message: format!("Hello, {}!", name),
-    };
-
-    HttpResponse::Ok().json(serde_json::json!(response))
-}
-
-/* fn init_tracer() {
-    global::set_text_map_propagator(TraceContextPropagator::new());
-    let provider = TracerProvider::builder()
-        .with_simple_exporter(SpanExporter::default())
-        .build();
-    global::set_tracer_provider(provider);
-} */
-
-
-fn init_tracer() -> Result<sdktrace::Tracer, TraceError> {
-    global::set_text_map_propagator(TraceContextPropagator::new());
-    let os_resource = OsResourceDetector.detect(Duration::from_secs(0));
-    let process_resource = ProcessResourceDetector.detect(Duration::from_secs(0));
-    let sdk_resource = SdkProvidedResourceDetector.detect(Duration::from_secs(0));
-    let env_resource = EnvResourceDetector::new().detect(Duration::from_secs(0));
-    let telemetry_resource = TelemetryResourceDetector.detect(Duration::from_secs(0));
-    opentelemetry_otlp::new_pipeline()
-        .tracing()
-        .with_exporter(
-            opentelemetry_otlp::new_exporter()
-                .tonic()
-                .with_endpoint(format!(
-                    "{}{}",
-                    env::var("OTEL_EXPORTER_OTLP_ENDPOINT")
-                        .unwrap_or_else(|_| "http://otelcol:4317".to_string()),
-                    "/v1/traces"
-                )), 
-        )
-        .with_trace_config(
-            sdktrace::config()
-                .with_resource(os_resource.merge(&process_resource).merge(&sdk_resource).merge(&env_resource).merge(&telemetry_resource)),
-        )
-        .install_batch(runtime::Tokio)
-}
 
 #[actix_web::main]
-async fn main() -> std::io::Result<()> {
-    std::env::set_var("RUST_LOG", "actix_web=info");
-    env_logger::init();
-
+async fn main() -> io::Result<()> {
     dotenv().ok();
 
-    log::warn!("Starting web server on 0.0.0.0:8080");
+    let fmt_layer = tracing_subscriber::fmt::layer();
 
-    // Start the Actix web server
-    HttpServer::new(|| App::new().wrap(Logger::default()).service(greet))
-        .bind(("0.0.0.0", 8080))?
-        .run()
-        .await
+    let telemetry_layer =
+        create_otlp_tracer().map(|t| tracing_opentelemetry::layer().with_tracer(t));
+
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::EnvFilter::from_default_env())
+        .with(fmt_layer)
+        .with(telemetry_layer)
+        .init();
+
+    info!("Starting web server on 0.0.0.0:8080");
+
+    let server = HttpServer::new(move || {
+        App::new()
+            .wrap(TracingLogger::default())
+            .service(web::resource("/").to(index))
+            .route("/hello", web::get().to(get_random))
+    })
+    .bind("0.0.0.0:8080")
+    .unwrap();
+
+    server.workers(2).run().await
+}
+
+fn create_otlp_tracer() -> Option<opentelemetry_sdk::trace::Tracer> {
+    let tracing = opentelemetry_otlp::new_pipeline().tracing();
+    let headers = parse_otlp_headers_from_env();
+
+    let mut exporter = opentelemetry_otlp::new_exporter()
+        .tonic()
+        .with_metadata(metadata_from_headers(headers));
+
+    exporter = exporter.with_tls_config(Default::default());
+
+    let tracer = tracing.with_exporter(exporter);
+
+    Some(
+        tracer
+            .install_batch(opentelemetry_sdk::runtime::Tokio)
+            .unwrap(),
+    )
+}
+
+fn metadata_from_headers(headers: Vec<(String, String)>) -> tonic::metadata::MetadataMap {
+    use tonic::metadata;
+
+    let mut metadata = metadata::MetadataMap::new();
+    headers.into_iter().for_each(|(name, value)| {
+        let value = value
+            .parse::<metadata::MetadataValue<metadata::Ascii>>()
+            .expect("Header value invalid");
+        metadata.insert(metadata::MetadataKey::from_str(&name).unwrap(), value);
+    });
+    metadata
+}
+
+fn parse_otlp_headers_from_env() -> Vec<(String, String)> {
+    let mut headers = Vec::new();
+
+    if let Ok(hdrs) = std::env::var("OTEL_EXPORTER_OTLP_HEADERS") {
+        hdrs.split(',')
+            .map(|header| {
+                header
+                    .split_once('=')
+                    .expect("Header should contain '=' character")
+            })
+            .for_each(|(name, value)| headers.push((name.to_owned(), value.to_owned())));
+    }
+    headers
+}
+
+#[tracing::instrument()]
+async fn index() -> HttpResponse {
+    debug!("Handling index request");
+    HttpResponse::Ok().body("Hello. You probably want to try the /rand endpoint.")
+}
+
+#[tracing::instrument()]
+async fn get_random() -> HttpResponse {
+    debug!("Generating random number");
+    let random_number = rand::random::<u64>();
+    debug!("Value is {random_number}");
+    HttpResponse::Ok().body(format!("Hello. Your random number is {random_number}."))
 }
