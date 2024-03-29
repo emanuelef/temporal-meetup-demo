@@ -2,11 +2,13 @@ package workflow
 
 import (
 	"context"
+	"io"
 	"time"
 
 	"github.com/emanuelef/temporal-meetup-demo/go-app/dynamo"
-	"github.com/emanuelef/temporal-meetup-demo/go-app/s3"
+	//"github.com/emanuelef/temporal-meetup-demo/go-app/s3"
 	_ "github.com/joho/godotenv/autoload"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -30,9 +32,15 @@ func Workflow(ctx workflow.Context, name string) error {
 		// HeartbeatTimeout:    10 * time.Second,
 	})
 
-	err := workflow.ExecuteActivity(ctx, Activity).Get(ctx, nil)
+/* 	err := workflow.ExecuteActivity(ctx, Activity).Get(ctx, nil)
 	if err != nil {
 		logger.Error("Activity failed.", "Error", err)
+		return err
+	} */
+
+	err := workflow.ExecuteActivity(ctx, SecondActivity).Get(ctx, nil)
+	if err != nil {
+		logger.Error("Second Activity failed.", "Error", err)
 		return err
 	}
 
@@ -65,13 +73,13 @@ func Activity(ctx context.Context, name string) error {
 		return err
 	}
 
-/* 	time.Sleep(1 * time.Second)
+	/* 	time.Sleep(1 * time.Second)
 
-	_, err = s3.NewS3Client(ctx, "ciao")
+	   	_, err = s3.NewS3Client(ctx, "ciao")
 
-	if err != nil {
-		return err
-	} */
+	   	if err != nil {
+	   		return err
+	   	} */
 
 	/*
 		_, err = s3Client.ListScripts(ctx)
@@ -83,6 +91,22 @@ func Activity(ctx context.Context, name string) error {
 
 	// Add an event to the current span
 	span.AddEvent("Done Activity")
+
+	return nil
+}
+
+func SecondActivity(ctx context.Context, name string) error {
+	logger := activity.GetLogger(ctx)
+	logger.Info("Activity", "name", name)
+
+	externalURL := "https://pokeapi.co/api/v2/pokemon/ditto"
+	resp, err := otelhttp.Get(ctx, externalURL)
+
+	if err != nil {
+		return err
+	}
+
+	_, _ = io.ReadAll(resp.Body)
 
 	return nil
 }
