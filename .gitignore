@@ -13,3 +13,4 @@ rust-app/target
 build.rs
 *.rs.bk
 target/
+*.pyc
