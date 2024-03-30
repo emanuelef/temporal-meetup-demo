@@ -56,3 +56,58 @@ services:
       - ./localstack_init/s3.sh:/etc/localstack/init/ready.d/init-aws.sh
     expose:
       - 4566
+
+  rust-app:
+    build:
+      context: ./rust-app
+    depends_on:
+      - "dynamodb-local"
+    container_name: rust-app
+    ports:
+      - "8082:8080"
+    expose:
+      - 8082
+    env_file:
+      - .env
+    environment:
+      OTEL_SERVICE_NAME: "RustApp"
+      RUST_LOG: "debug,h2=warn"
+    restart: on-failure
+
+  api-app:
+    build:
+      context: ./go-app
+    depends_on:
+      - "dynamodb-local"
+      - "localstack"
+      - "rust-app"
+    container_name: api-app
+    ports:
+      - "8080:8080"
+    expose:
+      - 8080
+    env_file:
+      - .env
+    environment:
+      OTEL_SERVICE_NAME: "TemporalMeetup"
+      HOST: "0.0.0.0"
+      TEMPORAL_HOST: "host.docker.internal"
+    restart: on-failure
+
+  temporal-custom-worker:
+    build:
+      context: ./go-app
+      dockerfile: Dockerfile_Worker
+    depends_on:
+      - "dynamodb-local"
+      - "localstack"
+      - "rust-app"
+    container_name: temporal-custom-worker
+    env_file:
+      - .env
+    environment:
+      OTEL_SERVICE_NAME: "TemporalCustomWorker"
+      TEMPORAL_HOST: "host.docker.internal"
+      DYNAMO_HOST: "dynamodb-local"
+      LOCALSTACK_HOST: "localstack"
+    restart: on-failure

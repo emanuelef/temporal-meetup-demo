@@ -23,7 +23,7 @@ var tracer trace.Tracer
 var notToLogEndpoints = []string{"/health", "/metrics"}
 
 func init() {
-	tracer = otel.Tracer("github.com/emanuelef/go-gin-honeycomb")
+	tracer = otel.Tracer("github.com/emanuelef/temporal-meetup-demo/go-app/api_service")
 }
 
 func FilterTraces(req *http.Request) bool {
@@ -63,7 +63,14 @@ func main() {
 	})
 
 	r.GET("/start", func(c *gin.Context) {
-		clientTemporal, _ := starter.NewTemporalClient(c.Request.Context())
+		clientTemporal, err := starter.GetTemporalClient(c.Request.Context())
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		log.Println("OK Temporal client")
 
 		workflowID, err := clientTemporal.StartWorkflow(c.Request.Context())
 		if err != nil {
@@ -77,6 +84,8 @@ func main() {
 	host := utils.GetEnv("HOST", "localhost")
 	port := utils.GetEnv("PORT", "8080")
 	hostAddress := fmt.Sprintf("%s:%s", host, port)
+
+	log.Printf("Starting web server %s\n", hostAddress)
 
 	err = r.Run(hostAddress)
 	if err != nil {

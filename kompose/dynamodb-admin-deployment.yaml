@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.32.0 (HEAD)
+  labels:
+    io.kompose.service: dynamodb-admin
+  name: dynamodb-admin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: dynamodb-admin
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.32.0 (HEAD)
+      labels:
+        io.kompose.network/temporal-meetup-demo-default: "true"
+        io.kompose.service: dynamodb-admin
+    spec:
+      containers:
+        - env:
+            - name: AWS_ACCESS_KEY_ID
+              value: local
+            - name: AWS_REGION
+              value: localhost
+            - name: AWS_SECRET_ACCESS_KEY
+              value: local
+            - name: DYNAMO_ENDPOINT
+              value: http://dynamodb-local:8000
+          image: aaronshaf/dynamodb-admin:4.6.1
+          name: dynamodb-admin
+          ports:
+            - containerPort: 8001
+              hostPort: 8001
+              protocol: TCP
+      restartPolicy: Always

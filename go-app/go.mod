@@ -1,4 +1,4 @@
-module github.com/emanuelef/temporal-meetup-demo
+module github.com/emanuelef/temporal-meetup-demo/go-app
 
 go 1.22
 

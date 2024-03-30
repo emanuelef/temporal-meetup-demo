@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.32.0 (HEAD)
+  labels:
+    io.kompose.service: dynamodb-local
+  name: dynamodb-local
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: dynamodb-local
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.32.0 (HEAD)
+      labels:
+        io.kompose.network/temporal-meetup-demo-default: "true"
+        io.kompose.service: dynamodb-local
+    spec:
+      containers:
+        - args:
+            - -jar
+            - DynamoDBLocal.jar
+            - -sharedDb
+            - -dbPath
+            - ./data
+          image: amazon/dynamodb-local:2.3.0
+          name: dynamodb-local
+          ports:
+            - containerPort: 8000
+              hostPort: 8009
+              protocol: TCP
+            - containerPort: 8009
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /home/dynamodblocal/data
+              name: dynamodb-local-claim0
+          workingDir: /home/dynamodblocal
+      restartPolicy: Always
+      volumes:
+        - name: dynamodb-local-claim0
+          persistentVolumeClaim:
+            claimName: dynamodb-local-claim0

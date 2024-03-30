@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.32.0 (HEAD)
+  labels:
+    io.kompose.service: localstack
+  name: localstack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: localstack
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.32.0 (HEAD)
+      labels:
+        io.kompose.network/temporal-meetup-demo-default: "true"
+        io.kompose.service: localstack
+    spec:
+      containers:
+        - env:
+            - name: DEBUG
+              value: "1"
+            - name: SERVICES
+              value: s3
+          image: localstack/localstack:3.2.0
+          name: localstack
+          ports:
+            - containerPort: 4566
+              hostPort: 4566
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /var/lib/localstack
+              name: localstack-claim0
+            - mountPath: /files
+              name: localstack-claim1
+            - mountPath: /etc/localstack/init/ready.d/init-aws.sh
+              name: localstack-claim2
+      restartPolicy: Always
+      volumes:
+        - name: localstack-claim0
+          persistentVolumeClaim:
+            claimName: localstack-claim0
+        - name: localstack-claim1
+          persistentVolumeClaim:
+            claimName: localstack-claim1
+        - name: localstack-claim2
+          persistentVolumeClaim:
+            claimName: localstack-claim2

@@ -27,6 +27,8 @@ func Workflow(ctx workflow.Context, name string) error {
 	logger := workflow.GetLogger(ctx)
 	logger.Info("HelloWorld workflow started", "name", name)
 
+	// TODO: How to get the ctx from the caller to get the span ?
+
 	ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
 		StartToCloseTimeout: 3 * time.Minute,
 		// HeartbeatTimeout:    10 * time.Second,

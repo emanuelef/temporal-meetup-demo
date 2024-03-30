@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.32.0 (HEAD)
+  labels:
+    io.kompose.service: aws-cli
+  name: aws-cli
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: aws-cli
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.32.0 (HEAD)
+      labels:
+        io.kompose.network/temporal-meetup-demo-default: "true"
+        io.kompose.service: aws-cli
+    spec:
+      containers:
+        - args:
+            - |2
+               for script_name in /init-scripts/*.sh; do
+                 sh $(script)_name
+               done
+          command:
+            - /bin/sh
+            - -c
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              value: local
+            - name: AWS_DEFAULT_PROFILE
+              value: dynamo-db-local
+            - name: AWS_ENDPOINT
+              value: --endpoint-url=http://dynamodb-local:8000
+            - name: AWS_SECRET_ACCESS_KEY
+              value: local
+            - name: METADATA_TABLE_NAME
+              value: local-asm-metadata
+            - name: SERVICES_TABLE_NAME
+              value: local-asm-services
+          image: amazon/aws-cli
+          name: aws-cli
+          volumeMounts:
+            - mountPath: /init-scripts
+              name: aws-cli-claim0
+      restartPolicy: Always
+      volumes:
+        - name: aws-cli-claim0
+          persistentVolumeClaim:
+            claimName: aws-cli-claim0

@@ -31,21 +31,27 @@ type TemporalClient struct {
 	table  string
 }
 
-func NewTemporalClient(ctx context.Context) (*TemporalClient, error) {
+func GetTemporalClient(ctx context.Context) (*TemporalClient, error) {
 	var initErr error
 	span := trace.SpanFromContext(ctx)
 	once.Do(func() {
 		span.AddEvent("First initialization of the Temporal client")
-		// Check here error shadowing and cheeck after once.Do
+		// Check here error shadowing and check after once.Do
 		tracingInterceptor, err := opentelemetry.NewTracingInterceptor(opentelemetry.TracerOptions{})
 		if err != nil {
 			log.Println("Unable to create interceptor", err)
 			span.AddEvent("Unable to create interceptor")
+			initErr = err
 			return
 		}
 
+		temporalEndpoint := fmt.Sprintf("%s:%s",
+			utils.GetEnv("TEMPORAL_HOST", "localhost"),
+			utils.GetEnv("TEMPORAL_PORT", "7233"))
+
 		options := client.Options{
 			Interceptors: []interceptor.ClientInterceptor{tracingInterceptor},
+			HostPort:     temporalEndpoint,
 		}
 
 		// The client is a heavyweight object that should be created once per process.
@@ -53,9 +59,10 @@ func NewTemporalClient(ctx context.Context) (*TemporalClient, error) {
 		if err != nil {
 			log.Println("Unable to create client", err)
 			span.AddEvent("Unable to create client")
+			initErr = err
 			return
 		}
-		// defer c.Close()
+		// defer c.Close() // When is the client closed ?
 
 		instance = &TemporalClient{
 			client: c,
@@ -87,6 +94,11 @@ func (c *TemporalClient) StartWorkflow(ctx context.Context) (string, error) {
 		TaskQueue:          TASK_QUEUE,
 		RetryPolicy:        retrypolicy,
 		WorkflowRunTimeout: 6 * time.Minute,
+	}
+
+	if c.client == nil {
+		err := fmt.Errorf("The Temporal Client has not been initialized")
+		return "", err
 	}
 
 	we, err := c.client.ExecuteWorkflow(ctx, workflowOptions, workflow.Workflow, "Temporal")

@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/emanuelef/temporal-meetup-demo/go-app/otel_instrumentation"
+	"github.com/emanuelef/temporal-meetup-demo/go-app/utils"
 	workflow "github.com/emanuelef/temporal-meetup-demo/go-app/workflow"
 	_ "github.com/joho/godotenv/autoload"
 	"go.temporal.io/sdk/client"
@@ -35,8 +37,13 @@ func main() {
 		log.Fatalln("Unable to create interceptor", err)
 	}
 
+	temporalEndpoint := fmt.Sprintf("%s:%s",
+		utils.GetEnv("TEMPORAL_HOST", "localhost"),
+		utils.GetEnv("TEMPORAL_PORT", "7233"))
+
 	options := client.Options{
 		Interceptors: []interceptor.ClientInterceptor{tracingInterceptor},
+		HostPort:     temporalEndpoint,
 	}
 
 	c, err := client.Dial(options)

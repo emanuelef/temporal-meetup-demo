@@ -1,0 +1,10 @@
+FROM golang:1.22.1-alpine AS builder
+WORKDIR /usr/src/app/
+COPY . .
+WORKDIR /usr/src/app/worker
+RUN go build -o /go/bin/
+
+FROM alpine:latest AS runner
+WORKDIR /usr/src/app/
+COPY --from=builder /go/bin/ .
+ENTRYPOINT [ "./worker" ]
