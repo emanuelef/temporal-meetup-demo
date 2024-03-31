@@ -7,7 +7,6 @@ import (
 
 	"github.com/emanuelef/temporal-meetup-demo/go-app/dynamo"
 	"github.com/emanuelef/temporal-meetup-demo/go-app/s3"
-	_ "github.com/joho/godotenv/autoload"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -60,7 +59,7 @@ func Activity(ctx context.Context, name string) error {
 
 	// Create a child span
 	_, childSpan := tracer.Start(ctx, "custom-span")
-	time.Sleep(11 * time.Second)
+	time.Sleep(3 * time.Second)
 	childSpan.End()
 
 	dynamoClient, err := dynamo.NewDynamoDBClient(ctx, "ciao")
@@ -74,6 +73,15 @@ func Activity(ctx context.Context, name string) error {
 	if err != nil {
 		return err
 	}
+
+	externalURL := "http://rust-app:8080/hello"
+	resp, err := otelhttp.Get(ctx, externalURL)
+
+	if err != nil {
+		return err
+	}
+
+	_, _ = io.ReadAll(resp.Body)
 
 	// Add an event to the current span
 	span.AddEvent("Done Activity")
