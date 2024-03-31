@@ -66,7 +66,6 @@ func Activity(ctx context.Context, name string) error {
 	childSpan.End()
 
 	dynamoClient, err := dynamo.NewDynamoDBClient(ctx, "ciao")
-
 	if err != nil {
 		return err
 	}
@@ -92,7 +91,6 @@ func Activity(ctx context.Context, name string) error {
 
 	externalURL := anomalyHostAddress + "/predict?repo=databricks/dbrx"
 	resp, err := otelhttp.Get(ctx, externalURL)
-
 	if err != nil {
 		return err
 	}
@@ -111,7 +109,6 @@ func SecondActivity(ctx context.Context, name string) error {
 
 	externalURL := "https://pokeapi.co/api/v2/pokemon/ditto"
 	resp, err := otelhttp.Get(ctx, externalURL)
-
 	if err != nil {
 		return err
 	}
@@ -121,7 +118,6 @@ func SecondActivity(ctx context.Context, name string) error {
 	time.Sleep(1 * time.Second)
 
 	s3Client, err := s3.NewS3Client(ctx, "ciao")
-
 	if err != nil {
 		return err
 	}

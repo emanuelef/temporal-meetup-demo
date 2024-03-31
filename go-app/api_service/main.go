@@ -64,7 +64,6 @@ func main() {
 
 	r.GET("/start", func(c *gin.Context) {
 		clientTemporal, err := starter.GetTemporalClient(c.Request.Context())
-
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return

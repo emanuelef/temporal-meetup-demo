@@ -51,7 +51,6 @@ app.add_middleware(
 # In-memory cache with a TTL (Time To Live) of 10 days
 cache = TTLCache(maxsize=1000, ttl=864000)
 
-
 @app.get("/health")
 async def root():
     current_span = trace.get_current_span()
