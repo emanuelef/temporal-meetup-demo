@@ -62,8 +62,8 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           platforms: linux/amd64,linux/arm64
-          context: python-app
-          file: ./python-app/Dockerfile
+          context: python-app/anomaly-detection
+          file: ./python-app/anomaly-detection/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
