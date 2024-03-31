@@ -1,0 +1,126 @@
+version: '3.8'
+
+services:
+  dynamodb-local:
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    image: "amazon/dynamodb-local:2.3.0"
+    container_name: dynamodb-local
+    ports:
+      - "8009:8000"
+    volumes:
+      - "./local_dynamodb_volume:/home/dynamodblocal/data"
+    working_dir: /home/dynamodblocal
+    expose:
+      - 8009
+  dynamodb-admin:
+    image: "aaronshaf/dynamodb-admin:4.6.1"
+    ports:
+      - "8001:8001"
+    environment:
+      DYNAMO_ENDPOINT: "http://dynamodb-local:8000"
+      AWS_REGION: "localhost"
+      AWS_ACCESS_KEY_ID: local
+      AWS_SECRET_ACCESS_KEY: local
+    depends_on:
+      - dynamodb-local
+  aws-cli:
+    image: amazon/aws-cli
+    depends_on:
+      - dynamodb-local
+    environment:
+      AWS_DEFAULT_PROFILE: dynamo-db-local
+      AWS_ENDPOINT: --endpoint-url=http://dynamodb-local:8000
+      AWS_ACCESS_KEY_ID: local
+      AWS_SECRET_ACCESS_KEY: local
+      METADATA_TABLE_NAME: local-asm-metadata
+      SERVICES_TABLE_NAME: local-asm-services
+    entrypoint: /bin/sh -c
+    volumes:
+      - './dynamodb-init:/init-scripts'
+    command: >
+      '
+       for script_name in /init-scripts/*.sh; do
+         sh $$script_name
+       done
+      '
+  localstack:
+    image: localstack/localstack:3.2.0
+    ports:
+      - "4566:4566"
+    environment:
+      - DEBUG=1
+      - SERVICES=s3
+    volumes:
+      - ./localstack_volume:/var/lib/localstack
+      - ./localstack_init/files:/files
+      - ./localstack_init/s3.sh:/etc/localstack/init/ready.d/init-aws.sh
+    expose:
+      - 4566
+
+  rust-app:
+    image: ghcr.io/emanuelef/rust-app-demo:latest
+    depends_on:
+      - "dynamodb-local"
+    container_name: rust-app
+    ports:
+      - "8082:8080"
+    expose:
+      - 8082
+    env_file:
+      - .env
+    environment:
+      OTEL_SERVICE_NAME: "RustApp"
+      RUST_LOG: "debug,h2=warn"
+    restart: on-failure
+
+  anomaly-detection:
+    image: ghcr.io/emanuelef/python-app-demo:latest
+    depends_on:
+      - "dynamodb-local"
+    container_name: anomaly-detection
+    ports:
+      - "8086:8086"
+    expose:
+      - 8086
+    env_file:
+      - .env
+    environment:
+      OTEL_SERVICE_NAME: "AnomalyDetector"
+    restart: on-failure
+
+  api-app:
+    image: ghcr.io/emanuelef/go-app-demo:latest
+    depends_on:
+      - "dynamodb-local"
+      - "localstack"
+      - "rust-app"
+    container_name: api-app
+    ports:
+      - "8080:8080"
+    expose:
+      - 8080
+    env_file:
+      - .env
+    environment:
+      OTEL_SERVICE_NAME: "TemporalMeetup"
+      HOST: "0.0.0.0"
+      TEMPORAL_HOST: "host.docker.internal"
+    restart: on-failure
+
+  temporal-custom-worker:
+    image: ghcr.io/emanuelef/go-temporal-worker-demo:latest
+    depends_on:
+      - "dynamodb-local"
+      - "localstack"
+      - "rust-app"
+    container_name: temporal-custom-worker
+    env_file:
+      - .env
+    environment:
+      OTEL_SERVICE_NAME: "TemporalCustomWorker"
+      TEMPORAL_HOST: "host.docker.internal"
+      DYNAMO_HOST: "dynamodb-local"
+      DYNAMO_PORT: "8000"
+      LOCALSTACK_HOST: "localstack"
+      ANOMALY_HOST: "host.docker.internal"
+    restart: on-failure

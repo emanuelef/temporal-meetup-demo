@@ -27,3 +27,7 @@ Questions
 ```
 awslocal s3api list-buckets
 ```
+
+```
+docker compose -f docker-compose-ghcr.yml up
+```
