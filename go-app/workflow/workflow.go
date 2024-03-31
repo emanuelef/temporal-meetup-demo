@@ -2,11 +2,14 @@ package workflow
 
 import (
 	"context"
+	"fmt"
 	"io"
+	"net"
 	"time"
 
 	"github.com/emanuelef/temporal-meetup-demo/go-app/dynamo"
 	"github.com/emanuelef/temporal-meetup-demo/go-app/s3"
+	"github.com/emanuelef/temporal-meetup-demo/go-app/utils"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -74,7 +77,20 @@ func Activity(ctx context.Context, name string) error {
 		return err
 	}
 
-	externalURL := "http://rust-app:8080/hello"
+	/* 	externalURL := "http://rust-app:8080/hello"
+	   	resp, err := otelhttp.Get(ctx, externalURL)
+
+	   	if err != nil {
+	   		return err
+	   	}
+
+	   	_, _ = io.ReadAll(resp.Body) */
+
+	host := utils.GetEnv("ANOMALY_HOST", "localhost")
+	port := utils.GetEnv("ANOMALY_PORT", "8086")
+	anomalyHostAddress := fmt.Sprintf("http://%s", net.JoinHostPort(host, port))
+
+	externalURL := anomalyHostAddress + "/predict?repo=databricks/dbrx"
 	resp, err := otelhttp.Get(ctx, externalURL)
 
 	if err != nil {

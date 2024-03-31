@@ -74,6 +74,22 @@ services:
       RUST_LOG: "debug,h2=warn"
     restart: on-failure
 
+  anomaly-detection:
+    build:
+      context: ./python-app/anomaly-detection
+    depends_on:
+      - "dynamodb-local"
+    container_name: anomaly-detection
+    ports:
+      - "8086:8086"
+    expose:
+      - 8086
+    env_file:
+      - .env
+    environment:
+      OTEL_SERVICE_NAME: "AnomalyDetector"
+    restart: on-failure
+
   api-app:
     build:
       context: ./go-app
@@ -111,4 +127,5 @@ services:
       DYNAMO_HOST: "dynamodb-local"
       DYNAMO_PORT: "8000"
       LOCALSTACK_HOST: "localstack"
+      ANOMALY_HOST: "host.docker.internal"
     restart: on-failure
