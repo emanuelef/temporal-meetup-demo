@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"sync"
 	"time"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -22,7 +21,6 @@ import (
 const TASK_QUEUE = "MeetupExample"
 
 var (
-	once     sync.Once
 	instance *TemporalClient
 )
 
@@ -34,15 +32,16 @@ type TemporalClient struct {
 func GetTemporalClient(ctx context.Context) (*TemporalClient, error) {
 	var initErr error
 	span := trace.SpanFromContext(ctx)
-	once.Do(func() {
+
+	// shortcut, might be using once instead
+	if instance == nil {
 		span.AddEvent("First initialization of the Temporal client")
-		// Check here error shadowing and check after once.Do
 		tracingInterceptor, err := opentelemetry.NewTracingInterceptor(opentelemetry.TracerOptions{})
 		if err != nil {
 			log.Println("Unable to create interceptor", err)
 			span.AddEvent("Unable to create interceptor")
 			initErr = err
-			return
+			return nil, initErr
 		}
 
 		temporalEndpoint := fmt.Sprintf("%s:%s",
@@ -60,7 +59,7 @@ func GetTemporalClient(ctx context.Context) (*TemporalClient, error) {
 			log.Println("Unable to create client", err)
 			span.AddEvent("Unable to create client")
 			initErr = err
-			return
+			return nil, initErr
 		}
 		// defer c.Close() // When is the client closed ?
 
@@ -68,10 +67,6 @@ func GetTemporalClient(ctx context.Context) (*TemporalClient, error) {
 			client: c,
 			table:  "ciao",
 		}
-	})
-
-	if initErr != nil {
-		return nil, initErr
 	}
 
 	return instance, nil

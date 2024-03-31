@@ -113,7 +113,7 @@ services:
   temporal-custom-worker:
     build:
       context: ./go-app
-      dockerfile: Dockerfile_Worker
+      dockerfile: Dockerfile.worker
     depends_on:
       - "dynamodb-local"
       - "localstack"

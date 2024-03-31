@@ -1,4 +1,4 @@
-name: Publish Go App Docker image to GHCR
+name: Publish Go Temporal Worker Docker image to GHCR
 
 on:
   workflow_dispatch:
@@ -9,11 +9,11 @@ on:
       - "go-app/*"
       - "go-app/go.mod"
       - "go-app/go.sum"
-      - "go-app/Dockerfile"
+      - "go-app/Dockerfile.worker"
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: emanuelef/go-app-demo
+  IMAGE_NAME: emanuelef/go-temporal-worker-demo
   VERSION_NUMBER: latest
 
 jobs:
@@ -65,7 +65,7 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
           context: go-app
-          file: ./go-app/Dockerfile
+          file: ./go-app/Dockerfile.worker
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

@@ -21,7 +21,7 @@ updates:
       interval: weekly
 
   - package-ecosystem: "docker"
-    directory: "/python-app"
+    directory: "/python-app/anomaly-detection"
     schedule:
       interval: weekly
 
