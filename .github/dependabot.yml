@@ -4,13 +4,16 @@ updates:
     directory: "/go-app"
     schedule:
       interval: weekly
-    labels:
-      - "🤖 Dependencies"
 
   - package-ecosystem: "cargo"
     directory: "/rust-app"
     schedule:
       interval: "weekly"
+
+  - package-ecosystem: "pip" # Should work for Poetry
+    directory: "/python-app"
+    schedule:
+      interval: weekly
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -18,6 +21,16 @@ updates:
       interval: weekly
 
   - package-ecosystem: "docker"
-    directory: "/"
+    directory: "/python-app"
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: "docker"
+    directory: "/go-app"
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: "docker"
+    directory: "/rust-app"
     schedule:
       interval: weekly
