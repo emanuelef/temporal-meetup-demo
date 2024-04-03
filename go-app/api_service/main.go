@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"slices"
@@ -14,6 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -56,9 +58,21 @@ func main() {
 	})
 
 	r.GET("/hello", func(c *gin.Context) {
-		_, childSpan := tracer.Start(c.Request.Context(), "custom-child-span")
+		ctx, childSpan := tracer.Start(c.Request.Context(), "custom-child-span")
 		time.Sleep(10 * time.Millisecond) // simulate some work
+
+		externalURL := "http://localhost:8090/rand"
+		resp, _ := otelhttp.Get(ctx, externalURL)
+
+		_, _ = io.ReadAll(resp.Body)
+
 		childSpan.End()
+
+		externalURL = "http://localhost:8086/predict?repo=databricks/dbrx"
+		resp, _ = otelhttp.Get(ctx, externalURL)
+
+		_, _ = io.ReadAll(resp.Body)
+
 		c.JSON(http.StatusNoContent, gin.H{})
 	})
 

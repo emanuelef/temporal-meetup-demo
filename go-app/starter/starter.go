@@ -20,9 +20,7 @@ import (
 
 const TASK_QUEUE = "MeetupExample"
 
-var (
-	instance *TemporalClient
-)
+var instance *TemporalClient
 
 type TemporalClient struct {
 	client client.Client
