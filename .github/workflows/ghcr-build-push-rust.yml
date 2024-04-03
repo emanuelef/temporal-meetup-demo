@@ -8,6 +8,7 @@ on:
     paths:
       - "rust-app/src/main.rs"
       - "rust-app/Cargo.toml"
+      - "rust-app/Cargo.lock"
       - "rust-app/Dockerfile"
 
 env:
