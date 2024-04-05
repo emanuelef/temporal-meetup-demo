@@ -91,6 +91,10 @@ services:
   grpc-server:
     image: ghcr.io/emanuelef/go-grpc-demo:latest
     container_name: grpc-server
+    ports:
+      - "7070:7070"
+    expose:
+      - 7070
     env_file:
       - .env
     environment:

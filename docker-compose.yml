@@ -95,6 +95,10 @@ services:
       context: ./go-app
       dockerfile: Dockerfile.grpc
     container_name: grpc-server
+    ports:
+      - "7070:7070"
+    expose:
+      - 7070
     env_file:
       - .env
     environment:
