@@ -44,7 +44,7 @@ services:
        done
       '
   localstack:
-    image: localstack/localstack:3.2.0
+    image: localstack/localstack:3.3.0
     ports:
       - "4566:4566"
     environment:
@@ -88,6 +88,16 @@ services:
       OTEL_SERVICE_NAME: "AnomalyDetector"
     restart: on-failure
 
+  grpc-server:
+    image: ghcr.io/emanuelef/go-grpc-demo:latest
+    container_name: grpc-server
+    env_file:
+      - .env
+    environment:
+      OTEL_SERVICE_NAME: "gRPCServer"
+      HOST: 0.0.0.0
+    restart: on-failure
+
   api-app:
     image: ghcr.io/emanuelef/go-app-demo:latest
     depends_on:
@@ -105,6 +115,7 @@ services:
       OTEL_SERVICE_NAME: "TemporalMeetup"
       HOST: "0.0.0.0"
       TEMPORAL_HOST: "host.docker.internal"
+      GRPC_TARGET: "grpc-server"
     restart: on-failure
 
   temporal-custom-worker:

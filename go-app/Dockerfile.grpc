@@ -1,10 +1,12 @@
-FROM golang:1.22.2-alpine AS builder
+FROM golang:1.22.2-alpine as builder
 WORKDIR /usr/src/app/
 COPY . .
-WORKDIR /usr/src/app/worker
+WORKDIR /usr/src/app/grpc-server
 RUN go build -o /go/bin/
 
 FROM alpine:latest AS runner
+WORKDIR /home/app
 WORKDIR /usr/src/app/
 COPY --from=builder /go/bin/ .
-ENTRYPOINT [ "./worker" ]
+EXPOSE 7070
+ENTRYPOINT [ "./grpc-server" ]

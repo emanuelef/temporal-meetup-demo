@@ -10,14 +10,18 @@ import (
 	"time"
 
 	"github.com/emanuelef/temporal-meetup-demo/go-app/otel_instrumentation"
+	"github.com/emanuelef/temporal-meetup-demo/go-app/proto"
 	"github.com/emanuelef/temporal-meetup-demo/go-app/starter"
 	"github.com/emanuelef/temporal-meetup-demo/go-app/utils"
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 var tracer trace.Tracer
@@ -72,6 +76,39 @@ func main() {
 		resp, _ = otelhttp.Get(ctx, externalURL)
 
 		_, _ = io.ReadAll(resp.Body)
+
+		c.JSON(http.StatusNoContent, gin.H{})
+	})
+
+	r.GET("/hello-grpc", func(c *gin.Context) {
+		grpcHost := utils.GetEnv("GRPC_TARGET", "localhost")
+		grpcTarget := fmt.Sprintf("%s:7070", grpcHost)
+
+		conn, err := grpc.NewClient(grpcTarget,
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+			grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+		)
+		if err != nil {
+			log.Printf("Did not connect: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": err.Error(),
+			})
+			return
+		}
+
+		defer conn.Close()
+		cli := protos.NewGreeterClient(conn)
+
+		r, err := cli.SayHello(c.Request.Context(), &protos.HelloRequest{Greeting: "ciao"})
+		if err != nil {
+			log.Printf("Error: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": err.Error(),
+			})
+			return
+		}
+
+		log.Printf("Greeting: %s", r.GetReply())
 
 		c.JSON(http.StatusNoContent, gin.H{})
 	})
