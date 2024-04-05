@@ -1,14 +1,6 @@
 name: golangci-lint
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - "go-app/*"
-      - "go-app/go.mod"
-      - "go-app/go.sum"
-  pull_request:
 
 permissions:
   contents: read
