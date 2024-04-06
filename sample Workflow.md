@@ -15,7 +15,7 @@ sequenceDiagram
     Go API gateway -) Temporal: Trigger ExecuteWorkflow
     Temporal -->>+ Go API gateway: Run ExecuteWorkflow
     Note right of Temporal: Generate Workflow ID
-    Note right of Go API gateway: Returns immediately with 202 and returns workflowID
+    Note left of Go API gateway: Returns immediately<br/>with 202 and returns workflowID
     Temporal ->>+ Temporal Worker: Run Workflow
     Temporal Worker ->>+ AWS DynamoDB: Fetch some data from the DB
     Note right of Temporal Worker: done in FetchInfoActivity

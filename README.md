@@ -56,3 +56,7 @@ awslocal s3api list-buckets
 ```
 docker compose -f docker-compose-ghcr.yml up
 ```
+
+## Links
+
+https://mermaid.js.org/syntax/sequenceDiagram.html
