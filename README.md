@@ -1,6 +1,31 @@
 # temporal-meetup-demo
 
-### Steps to run this sample:
+## Requirements 
+- [Docker compose](https://docs.docker.com/compose/install/)
+- [Temporal CLI](https://docs.temporal.io/cli#install)
+- [Honeycomb.io account](https://ui.honeycomb.io/signup) It's free and no CC required
+
+## Run this sample
+
+Make sure port 8080 is available on your system
+
+### Make
+
+1. Create the .env file with the Honeycomb Configuration API key (one off, only needed once)
+`make create-env`
+2. Start the example
+`make start`
+3. Trigger a Temporal workflow
+`curl localhost:8080/start`
+4. Temporal UI
+`http://localhost:8233/namespaces/default/workflows`
+5. Honeycomb UI
+`https://ui.honeycomb.io` Make sure to select TemporalMeetup dataset in the upper left corner
+6. Stop
+`make stop`
+
+### Manual
+
 1) Run a [Temporal service](https://github.com/temporalio/samples-go/tree/main/#how-to-use).
 
 One way could be just to use the Temporal CLI.  
