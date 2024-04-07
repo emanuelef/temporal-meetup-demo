@@ -2,10 +2,15 @@
 dev: check-env
 	@echo "Start Temporal"
 	temporal server start-dev >/dev/null 2>&1 &
-	docker compose up --force-recreate --remove-orphans --detach
+	docker compose up --build --force-recreate --remove-orphans --detach
 	@echo "Temporal Meetup Demo Started"
 	@echo "Temporal UI http://localhost:8233/namespaces/default/workflows"
 	@echo "curl localhost:8080/start to start a Temporal Worflow"
+
+.PHONY: rebuild
+rebuild: check-env
+	@echo "Rebuild local Docker images"
+	docker-compose build --no-cache
 
 .PHONY: start
 start: check-env
