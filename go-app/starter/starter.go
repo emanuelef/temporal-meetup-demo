@@ -94,10 +94,16 @@ func (c *TemporalClient) StartWorkflow(ctx context.Context) (string, error) {
 		return "", err
 	}
 
-	we, err := c.client.ExecuteWorkflow(ctx, workflowOptions, workflow.Workflow, "Temporal")
+	workflowInput := workflow.ServiceWorkflowInput{
+		Name:     "guestWifi",
+		Metadata: "simple payload",
+	}
+
+	we, err := c.client.ExecuteWorkflow(ctx, workflowOptions, workflow.Workflow, workflowInput)
 	if err != nil {
 		log.Println("Unable to execute workflow", err)
 		span.AddEvent("Unable to execute workflow")
+		span.SetAttributes(attribute.String("error.message", err.Error()))
 		return "", err
 	}
 

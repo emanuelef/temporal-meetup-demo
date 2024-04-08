@@ -20,14 +20,28 @@ import (
 
 var tracer trace.Tracer
 
+type ServiceWorkflowInput struct {
+	Name     string
+	Metadata string
+}
+
+type ServiceWorkflowOutput struct {
+	Name      string
+	Activated bool
+}
+
 func init() {
 	// Name the tracer after the package, or the service if you are in main
 	tracer = otel.Tracer("github.com/emanuelef/temporal-meetup-demo")
 }
 
-func Workflow(ctx workflow.Context, name string) error {
+func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkflowOutput, error) {
 	logger := workflow.GetLogger(ctx)
-	logger.Info("HelloWorld workflow started", "name", name)
+	logger.Info("HelloWorld workflow started", "name", service.Name)
+
+	result := ServiceWorkflowOutput{
+		Name: service.Name,
+	}
 
 	// TODO: How to get the ctx from the caller to get the span ?
 
@@ -39,17 +53,17 @@ func Workflow(ctx workflow.Context, name string) error {
 	err := workflow.ExecuteActivity(ctx, Activity).Get(ctx, nil)
 	if err != nil {
 		logger.Error("Activity failed.", "Error", err)
-		return err
+		return result, err
 	}
 
 	err = workflow.ExecuteActivity(ctx, SecondActivity).Get(ctx, nil)
 	if err != nil {
 		logger.Error("Second Activity failed.", "Error", err)
-		return err
+		return result, err
 	}
 
 	logger.Info("HelloWorld workflow completed.")
-	return nil
+	return result, nil
 }
 
 func Activity(ctx context.Context, name string) error {
