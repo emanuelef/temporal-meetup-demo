@@ -4,7 +4,6 @@ go.work
 .env
 local_dynamodb_volume/*
 localstack_volume/*
-.vscode/
 .DS_Store
 tmp/
 rust-app/target

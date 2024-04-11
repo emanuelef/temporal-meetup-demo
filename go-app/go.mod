@@ -20,7 +20,7 @@ require (
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.25.0
 	go.opentelemetry.io/otel/sdk v1.25.0
 	go.opentelemetry.io/otel/trace v1.25.0
-	go.temporal.io/sdk v1.26.0
+	go.temporal.io/sdk v1.26.1
 	go.temporal.io/sdk/contrib/opentelemetry v0.5.0
 	google.golang.org/grpc v1.63.2
 	google.golang.org/protobuf v1.33.0
@@ -79,7 +79,7 @@ require (
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	go.opentelemetry.io/otel/metric v1.25.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.2.0 // indirect
-	go.temporal.io/api v1.31.0 // indirect
+	go.temporal.io/api v1.32.0 // indirect
 	golang.org/x/arch v0.7.0 // indirect
 	golang.org/x/crypto v0.22.0 // indirect
 	golang.org/x/exp v0.0.0-20240409090435-93d18d7e34b8 // indirect

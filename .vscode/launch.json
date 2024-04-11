@@ -1,0 +1,36 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch Package",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${fileDirname}"
+    },
+    {
+      "name": "Launch API Service",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "go-app/api_service/main.go",
+      "cwd": "go-app/api_service"
+    },
+    {
+      "name": "Launch Temporal Worker",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "go-app/worker/main.go",
+      "cwd": "go-app/worker"
+    },
+    {
+      "name": "Launch Rust app",
+      "type": "lldb",
+      "request": "launch",
+      "program": "rust-app/target/debug/rust-app",
+      "args": [],
+      "cwd": "rust-app"
+    }
+  ]
+}

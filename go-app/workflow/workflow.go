@@ -15,6 +15,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 	"go.temporal.io/sdk/activity"
+	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/workflow"
 )
 
@@ -56,6 +57,20 @@ func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkfl
 		return result, err
 	}
 
+	retrypolicy := &temporal.RetryPolicy{
+		InitialInterval:    2 * time.Second,
+		BackoffCoefficient: 2.0,
+		MaximumInterval:    time.Second * 100,
+		MaximumAttempts:    3,
+	  }
+
+	activityoptions := workflow.ActivityOptions{
+		ScheduleToCloseTimeout: 10 * time.Second,
+		RetryPolicy: retrypolicy,
+	}
+	
+	ctx = workflow.WithActivityOptions(ctx, activityoptions)
+
 	err = workflow.ExecuteActivity(ctx, SecondActivity).Get(ctx, nil)
 	if err != nil {
 		logger.Error("Second Activity failed.", "Error", err)
@@ -63,6 +78,7 @@ func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkfl
 	}
 
 	logger.Info("HelloWorld workflow completed.")
+
 	return result, nil
 }
 

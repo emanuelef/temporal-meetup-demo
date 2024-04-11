@@ -15,7 +15,7 @@ import (
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/contrib/opentelemetry"
 	"go.temporal.io/sdk/interceptor"
-	"go.temporal.io/sdk/temporal"
+	//"go.temporal.io/sdk/temporal"
 )
 
 const TASK_QUEUE = "MeetupExample"
@@ -74,18 +74,18 @@ func (c *TemporalClient) StartWorkflow(ctx context.Context) (string, error) {
 	span := trace.SpanFromContext(ctx)
 	span.SetAttributes(attribute.Bool("isTrue", true), attribute.String("stringAttr", "Ciao"))
 
-	retrypolicy := &temporal.RetryPolicy{
+/* 	retrypolicy := &temporal.RetryPolicy{
 		InitialInterval:    time.Second,
 		BackoffCoefficient: 2.0,
 		MaximumInterval:    time.Second * 100,
-	}
+	} */
 
 	temporalWorkflowId := fmt.Sprintf("service-%s", utils.GenerateUUID())
 
 	workflowOptions := client.StartWorkflowOptions{
 		ID:                 temporalWorkflowId,
 		TaskQueue:          TASK_QUEUE,
-		RetryPolicy:        retrypolicy,
+	//	RetryPolicy:        retrypolicy,
 		WorkflowRunTimeout: 6 * time.Minute,
 	}
 
