@@ -6,7 +6,7 @@ services:
     ports:
       - "8009:8000"
     volumes:
-      - "./local_dynamodb_volume:/home/dynamodblocal/data"
+      - "./local-dynamodb-volume:/home/dynamodblocal/data"
     working_dir: /home/dynamodblocal
     expose:
       - 8009
@@ -49,9 +49,9 @@ services:
       - DEBUG=1
       - SERVICES=s3
     volumes:
-      - ./localstack_volume:/var/lib/localstack
-      - ./localstack_init/files:/files
-      - ./localstack_init/s3.sh:/etc/localstack/init/ready.d/init-aws.sh
+      - ./localstack-volume:/var/lib/localstack
+      - ./localstack-init/files:/files
+      - ./localstack-init/s3.sh:/etc/localstack/init/ready.d/init-aws.sh
     expose:
       - 4566
 

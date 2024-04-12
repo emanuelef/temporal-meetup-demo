@@ -2,8 +2,8 @@
 *.out
 go.work
 .env
-local_dynamodb_volume/*
-localstack_volume/*
+local-dynamodb-volume/*
+localstack-volume/*
 .DS_Store
 tmp/
 rust-app/target
@@ -13,3 +13,5 @@ build.rs
 *.rs.bk
 target/
 *.pyc
+.env.aspecto
+.env.honeycomb

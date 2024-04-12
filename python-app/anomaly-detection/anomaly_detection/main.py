@@ -51,8 +51,8 @@ app.add_middleware(
 # In-memory cache with a TTL (Time To Live) of 10 days
 cache = TTLCache(maxsize=1000, ttl=864000)
 
-@app.get("/health")
-async def root():
+@app.get("/test")
+async def test():
     current_span = trace.get_current_span()
     current_span.set_attribute("operation.value", 1)
     current_span.add_event("Gonna try it!")

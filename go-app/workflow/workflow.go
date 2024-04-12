@@ -8,11 +8,13 @@ import (
 	"time"
 
 	"github.com/emanuelef/temporal-meetup-demo/go-app/dynamo"
+	"github.com/emanuelef/temporal-meetup-demo/go-app/otel_instrumentation"
 	"github.com/emanuelef/temporal-meetup-demo/go-app/s3"
 	"github.com/emanuelef/temporal-meetup-demo/go-app/utils"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/baggage"
 	"go.opentelemetry.io/otel/trace"
 	"go.temporal.io/sdk/activity"
 	"go.temporal.io/sdk/temporal"
@@ -46,6 +48,14 @@ func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkfl
 
 	// TODO: How to get the ctx from the caller to get the span ?
 
+	test1 := ctx.Value("SpanContextKey")
+
+	if test1 != nil {
+		logger.Info("Test")
+	}
+
+	//extractedBaggage := baggage.FromContext(ctx)
+
 	ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
 		StartToCloseTimeout: 3 * time.Minute,
 		// HeartbeatTimeout:    10 * time.Second,
@@ -62,13 +72,13 @@ func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkfl
 		BackoffCoefficient: 2.0,
 		MaximumInterval:    time.Second * 100,
 		MaximumAttempts:    3,
-	  }
+	}
 
 	activityoptions := workflow.ActivityOptions{
 		ScheduleToCloseTimeout: 10 * time.Second,
-		RetryPolicy: retrypolicy,
+		RetryPolicy:            retrypolicy,
 	}
-	
+
 	ctx = workflow.WithActivityOptions(ctx, activityoptions)
 
 	err = workflow.ExecuteActivity(ctx, SecondActivity).Get(ctx, nil)
@@ -86,9 +96,20 @@ func Activity(ctx context.Context, name string) error {
 	logger := activity.GetLogger(ctx)
 	logger.Info("Activity", "name", name)
 
+	extractedBaggage := baggage.FromContext(ctx)
+
 	// Get current span and add new attributes
 	span := trace.SpanFromContext(ctx)
+
+	for _, val := range extractedBaggage.Members() {
+		if val.Key() == "original_request_endpoint" {
+			span.SetAttributes(attribute.String(val.Key(), val.Value()))
+		}
+	}
+
 	span.SetAttributes(attribute.Bool("isTrue", true), attribute.String("stringAttr", "Ciao"))
+
+	otel_instrumentation.AddLogEvent(span, ServiceWorkflowInput{Name: "Good", Metadata: "Day"})
 
 	// Create a child span
 	_, childSpan := tracer.Start(ctx, "custom-span")
@@ -119,7 +140,13 @@ func Activity(ctx context.Context, name string) error {
 	port := utils.GetEnv("ANOMALY_PORT", "8086")
 	anomalyHostAddress := fmt.Sprintf("http://%s", net.JoinHostPort(host, port))
 
-	externalURL := anomalyHostAddress + "/predict?repo=databricks/dbrx"
+/* 	externalURL := anomalyHostAddress + "/predict?repo=databricks/dbrx"
+	resp, err := otelhttp.Get(ctx, externalURL)
+	if err != nil {
+		return err
+	} */
+
+	externalURL := anomalyHostAddress + "/test"
 	resp, err := otelhttp.Get(ctx, externalURL)
 	if err != nil {
 		return err

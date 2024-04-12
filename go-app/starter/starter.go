@@ -8,6 +8,7 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/baggage"
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/emanuelef/temporal-meetup-demo/go-app/utils"
@@ -74,7 +75,7 @@ func (c *TemporalClient) StartWorkflow(ctx context.Context) (string, error) {
 	span := trace.SpanFromContext(ctx)
 	span.SetAttributes(attribute.Bool("isTrue", true), attribute.String("stringAttr", "Ciao"))
 
-/* 	retrypolicy := &temporal.RetryPolicy{
+	/* 	retrypolicy := &temporal.RetryPolicy{
 		InitialInterval:    time.Second,
 		BackoffCoefficient: 2.0,
 		MaximumInterval:    time.Second * 100,
@@ -83,9 +84,9 @@ func (c *TemporalClient) StartWorkflow(ctx context.Context) (string, error) {
 	temporalWorkflowId := fmt.Sprintf("service-%s", utils.GenerateUUID())
 
 	workflowOptions := client.StartWorkflowOptions{
-		ID:                 temporalWorkflowId,
-		TaskQueue:          TASK_QUEUE,
-	//	RetryPolicy:        retrypolicy,
+		ID:        temporalWorkflowId,
+		TaskQueue: TASK_QUEUE,
+		//	RetryPolicy:        retrypolicy,
 		WorkflowRunTimeout: 6 * time.Minute,
 	}
 
@@ -98,6 +99,13 @@ func (c *TemporalClient) StartWorkflow(ctx context.Context) (string, error) {
 		Name:     "guestWifi",
 		Metadata: "simple payload",
 	}
+
+	baggage.New()
+
+	m0, _ := baggage.NewMemberRaw("original_request_endpoint", "/start")
+	m1, _ := baggage.NewMemberRaw("pippo", "bar1")
+	b, _ := baggage.New(m0, m1)
+	ctx = baggage.ContextWithBaggage(ctx, b)
 
 	we, err := c.client.ExecuteWorkflow(ctx, workflowOptions, workflow.Workflow, workflowInput)
 	if err != nil {

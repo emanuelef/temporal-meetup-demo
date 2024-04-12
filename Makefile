@@ -39,3 +39,7 @@ stop:
 	docker compose down --remove-orphans --volumes
 	@echo ""
 	@echo "Temporal Meetup Demo Stopped"
+
+.PHONY: trigger
+trigger:
+	curl localhost:8080/start
