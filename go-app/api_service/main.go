@@ -114,6 +114,18 @@ func main() {
 	})
 
 	r.GET("/start", func(c *gin.Context) {
+		ctx, childSpan := tracer.Start(c.Request.Context(), "prepare-workflow-payload")
+		defer childSpan.End()
+
+		externalURL := "https://pokeapi.co/api/v2/pokemon/ditto"
+		resp, err := otelhttp.Get(ctx, externalURL)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		_, _ = io.ReadAll(resp.Body)
+
 		clientTemporal, err := starter.GetTemporalClient(c.Request.Context())
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

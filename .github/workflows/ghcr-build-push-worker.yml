@@ -7,6 +7,7 @@ on:
       - main
     paths:
       - "go-app/worker/**"
+      - "go-app/workflow/**"
       - "go-app/go.mod"
       - "go-app/go.sum"
       - "go-app/Dockerfile.worker"

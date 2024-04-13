@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"net"
 	"time"
 
@@ -19,6 +20,7 @@ import (
 	"go.opentelemetry.io/otel/baggage"
 	"go.opentelemetry.io/otel/trace"
 	"go.temporal.io/sdk/activity"
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -44,8 +46,25 @@ func Activity(ctx context.Context, name string) error {
 
 	// Create a child span
 	_, childSpan := tracer.Start(ctx, "custom-span")
-	time.Sleep(3 * time.Second)
+	time.Sleep(300 * time.Millisecond)
 	childSpan.End()
+
+	group := errgroup.Group{}
+
+	for _, val := range []string{"a", "b", "c"} {
+		group.Go(func() error {
+			time.Sleep(time.Duration(10+rand.Intn(30)) * time.Millisecond)
+			_, childSpan := tracer.Start(ctx, "custom-span-"+val)
+			time.Sleep(time.Duration(100+rand.Intn(400)) * time.Millisecond)
+			childSpan.End()
+			return nil
+		})
+	}
+
+	// Wait for all goroutines to finish
+	if err := group.Wait(); err != nil {
+		fmt.Printf("Error: %v\n", err)
+	}
 
 	dynamoClient, err := dynamo.NewDynamoDBClient(ctx, "ciao")
 	if err != nil {

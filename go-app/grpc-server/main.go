@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"time"
 
 	"github.com/emanuelef/temporal-meetup-demo/go-app/otel_instrumentation"
 	"github.com/emanuelef/temporal-meetup-demo/go-app/protos"
@@ -45,6 +46,7 @@ func (s *server) SayHello(ctx context.Context, in *protos.HelloRequest) (*protos
 	log.Printf("Received: %v", in.GetGreeting())
 
 	_, childSpan := tracer.Start(ctx, "SayHelloCustom")
+	time.Sleep(400 * time.Millisecond)
 	defer childSpan.End()
 
 	if in.Greeting == "" {
