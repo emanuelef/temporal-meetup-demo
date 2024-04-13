@@ -4,93 +4,24 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"time"
 
 	"github.com/emanuelef/temporal-meetup-demo/go-app/dynamo"
 	"github.com/emanuelef/temporal-meetup-demo/go-app/otel_instrumentation"
+	"github.com/emanuelef/temporal-meetup-demo/go-app/protos"
 	"github.com/emanuelef/temporal-meetup-demo/go-app/s3"
 	"github.com/emanuelef/temporal-meetup-demo/go-app/utils"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/baggage"
 	"go.opentelemetry.io/otel/trace"
 	"go.temporal.io/sdk/activity"
-	"go.temporal.io/sdk/temporal"
-	"go.temporal.io/sdk/workflow"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
-
-var tracer trace.Tracer
-
-type ServiceWorkflowInput struct {
-	Name     string
-	Metadata string
-}
-
-type ServiceWorkflowOutput struct {
-	Name      string
-	Activated bool
-}
-
-func init() {
-	// Name the tracer after the package, or the service if you are in main
-	tracer = otel.Tracer("github.com/emanuelef/temporal-meetup-demo")
-}
-
-func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkflowOutput, error) {
-	logger := workflow.GetLogger(ctx)
-	logger.Info("HelloWorld workflow started", "name", service.Name)
-
-	result := ServiceWorkflowOutput{
-		Name: service.Name,
-	}
-
-	// TODO: How to get the ctx from the caller to get the span ?
-
-	test1 := ctx.Value("SpanContextKey")
-
-	if test1 != nil {
-		logger.Info("Test")
-	}
-
-	//extractedBaggage := baggage.FromContext(ctx)
-
-	ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
-		StartToCloseTimeout: 3 * time.Minute,
-		// HeartbeatTimeout:    10 * time.Second,
-	})
-
-	err := workflow.ExecuteActivity(ctx, Activity).Get(ctx, nil)
-	if err != nil {
-		logger.Error("Activity failed.", "Error", err)
-		return result, err
-	}
-
-	retrypolicy := &temporal.RetryPolicy{
-		InitialInterval:    2 * time.Second,
-		BackoffCoefficient: 2.0,
-		MaximumInterval:    time.Second * 100,
-		MaximumAttempts:    3,
-	}
-
-	activityoptions := workflow.ActivityOptions{
-		ScheduleToCloseTimeout: 10 * time.Second,
-		RetryPolicy:            retrypolicy,
-	}
-
-	ctx = workflow.WithActivityOptions(ctx, activityoptions)
-
-	err = workflow.ExecuteActivity(ctx, SecondActivity).Get(ctx, nil)
-	if err != nil {
-		logger.Error("Second Activity failed.", "Error", err)
-		return result, err
-	}
-
-	logger.Info("HelloWorld workflow completed.")
-
-	return result, nil
-}
 
 func Activity(ctx context.Context, name string) error {
 	logger := activity.GetLogger(ctx)
@@ -140,11 +71,11 @@ func Activity(ctx context.Context, name string) error {
 	port := utils.GetEnv("ANOMALY_PORT", "8086")
 	anomalyHostAddress := fmt.Sprintf("http://%s", net.JoinHostPort(host, port))
 
-/* 	externalURL := anomalyHostAddress + "/predict?repo=databricks/dbrx"
-	resp, err := otelhttp.Get(ctx, externalURL)
-	if err != nil {
-		return err
-	} */
+	/* 	externalURL := anomalyHostAddress + "/predict?repo=databricks/dbrx"
+	   	resp, err := otelhttp.Get(ctx, externalURL)
+	   	if err != nil {
+	   		return err
+	   	} */
 
 	externalURL := anomalyHostAddress + "/test"
 	resp, err := otelhttp.Get(ctx, externalURL)
@@ -184,6 +115,33 @@ func SecondActivity(ctx context.Context, name string) error {
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func ThirdActivity(ctx context.Context, name string) error {
+	grpcHost := utils.GetEnv("GRPC_TARGET", "localhost")
+	grpcTarget := fmt.Sprintf("%s:7070", grpcHost)
+
+	conn, err := grpc.NewClient(grpcTarget,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+	)
+	if err != nil {
+		log.Printf("Did not connect: %v", err)
+		return nil
+	}
+
+	defer conn.Close()
+	cli := protos.NewGreeterClient(conn)
+
+	r, err := cli.SayHello(ctx, &protos.HelloRequest{Greeting: "ciao"})
+	if err != nil {
+		log.Printf("Error: %v", err)
+		return nil
+	}
+
+	log.Printf("Greeting: %s", r.GetReply())
 
 	return nil
 }

@@ -57,6 +57,7 @@ func main() {
 	w.RegisterWorkflow(workflow.Workflow)
 	w.RegisterActivity(workflow.Activity)
 	w.RegisterActivity(workflow.SecondActivity)
+	w.RegisterActivity(workflow.ThirdActivity)
 
 	err = w.Run(worker.InterruptCh())
 	if err != nil {

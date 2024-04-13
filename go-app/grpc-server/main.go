@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/emanuelef/temporal-meetup-demo/go-app/otel_instrumentation"
-	"github.com/emanuelef/temporal-meetup-demo/go-app/proto"
+	"github.com/emanuelef/temporal-meetup-demo/go-app/protos"
 
 	_ "github.com/joho/godotenv/autoload"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"

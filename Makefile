@@ -21,11 +21,13 @@ start: check-env
 	@echo "Temporal UI http://localhost:8233/namespaces/default/workflows"
 	@echo "curl localhost:8080/start to start a Temporal Worflow"
 
+.PHONY: check-env
 check-env:
 	@echo "Checking for .env file"
 	@test -f .env && echo ".env file found for OTeL data configuration" || \
-	(echo ".env file is needed to specify where to send OTeL data"; exit 1)
+	(echo ".env file is needed to specify where to send OTeL data, run make create-env"; exit 1)
 
+.PHONY: create-env
 create-env:
 	@echo "Creating or overriding .env file"
 	@read -s -p "Enter your Configuration API key: " apiKey; \

@@ -143,4 +143,5 @@ services:
       DYNAMO_PORT: "8000"
       LOCALSTACK_HOST: "localstack"
       ANOMALY_HOST: "host.docker.internal"
+      GRPC_TARGET: "grpc-server"
     restart: on-failure

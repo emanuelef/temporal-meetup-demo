@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/emanuelef/temporal-meetup-demo/go-app/otel_instrumentation"
-	"github.com/emanuelef/temporal-meetup-demo/go-app/proto"
+	"github.com/emanuelef/temporal-meetup-demo/go-app/protos"
 	"github.com/emanuelef/temporal-meetup-demo/go-app/starter"
 	"github.com/emanuelef/temporal-meetup-demo/go-app/utils"
 	"github.com/gin-gonic/gin"
