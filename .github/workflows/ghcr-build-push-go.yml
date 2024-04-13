@@ -6,7 +6,7 @@ on:
     branches:
       - main
     paths:
-      - "go-app/*"
+      - "go-app/api_service/**"
       - "go-app/go.mod"
       - "go-app/go.sum"
       - "go-app/Dockerfile"
