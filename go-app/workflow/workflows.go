@@ -69,16 +69,41 @@ func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkfl
 
 	ctx = workflow.WithActivityOptions(ctx, activityoptions)
 
-	err = workflow.ExecuteActivity(ctx, SecondActivity).Get(ctx, nil)
+	selector := workflow.NewSelector(ctx)
+
+	secondActivityFuture := workflow.ExecuteActivity(ctx, SecondActivity)
 	if err != nil {
 		logger.Error("Second Activity failed.", "Error", err)
 		return result, err
 	}
 
-	err = workflow.ExecuteActivity(ctx, ThirdActivity).Get(ctx, nil)
+	thirdActivityFuture := workflow.ExecuteActivity(ctx, ThirdActivity)
 	if err != nil {
 		logger.Error("Second Activity failed.", "Error", err)
 		return result, err
+	}
+
+	pendingFutures := []workflow.Future{secondActivityFuture, thirdActivityFuture}
+
+	selector.AddFuture(secondActivityFuture, func(f workflow.Future) {
+		err1 := f.Get(ctx, nil)
+		if err1 != nil {
+			err = err1
+			return
+		}
+	}).AddFuture(thirdActivityFuture, func(f workflow.Future) {
+		err1 := f.Get(ctx, nil)
+		if err1 != nil {
+			err = err1
+			return
+		}
+	})
+
+	for range pendingFutures {
+		selector.Select(ctx)
+		if err != nil {
+			return result, err
+		}
 	}
 
 	logger.Info("HelloWorld workflow completed.")

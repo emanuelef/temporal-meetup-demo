@@ -16,7 +16,7 @@ rebuild: check-env
 start: check-env
 	@echo "Start Temporal"
 	temporal server start-dev >/dev/null 2>&1 &
-	docker compose -f docker-compose-ghcr.yml up --force-recreate --remove-orphans --detach
+	docker compose -f docker-compose-ghcr.yml up --pull always --force-recreate --remove-orphans --detach
 	@echo "Temporal Meetup Demo Started"
 	@echo "Temporal UI http://localhost:8233/namespaces/default/workflows"
 	@echo "curl localhost:8080/start to start a Temporal Worflow"
