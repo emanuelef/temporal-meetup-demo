@@ -85,21 +85,17 @@ func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkfl
 
 	pendingFutures := []workflow.Future{secondActivityFuture, thirdActivityFuture}
 
-	selector.AddFuture(secondActivityFuture, func(f workflow.Future) {
-		err1 := f.Get(ctx, nil)
-		if err1 != nil {
-			err = err1
-			return
-		}
-	}).AddFuture(thirdActivityFuture, func(f workflow.Future) {
-		err1 := f.Get(ctx, nil)
-		if err1 != nil {
-			err = err1
-			return
-		}
-	})
+	for _, future := range pendingFutures {
+		selector.AddFuture(future, func(f workflow.Future) {
+			err1 := f.Get(ctx, nil)
+			if err1 != nil {
+				err = err1
+				return
+			}
+		})
+	}
 
-	for range pendingFutures {
+	for range len(pendingFutures) {
 		selector.Select(ctx)
 		if err != nil {
 			return result, err

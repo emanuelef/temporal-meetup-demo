@@ -1,3 +1,4 @@
+# Start building local Docker images
 .PHONY: dev
 dev: check-env
 	@echo "Start Temporal"
@@ -12,11 +13,12 @@ rebuild: check-env
 	@echo "Rebuild local Docker images"
 	docker-compose build --no-cache
 
+# Start using Docker images
 .PHONY: start
 start: check-env
 	@echo "Start Temporal"
 	temporal server start-dev >/dev/null 2>&1 &
-	docker compose -f docker-compose-ghcr.yml up --pull always --force-recreate --remove-orphans --detach
+	docker compose -f docker-compose.yml up --pull always --force-recreate --remove-orphans --detach
 	@echo "Temporal Meetup Demo Started"
 	@echo "Temporal UI http://localhost:8233/namespaces/default/workflows"
 	@echo "curl localhost:8080/start to start a Temporal Worflow"
