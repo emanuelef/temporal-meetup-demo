@@ -25,8 +25,10 @@ Make sure port 8080 is available on your system
 `make stop`
 
 ### Honeycomb.io 
-<img width="1342" alt="Screenshot 2024-04-14 at 23 44 39" src="https://github.com/emanuelef/temporal-meetup-demo/assets/48717/1bd18950-581b-4a22-9cac-3bd116f32ca7">
 
+The provion API call will generate something like:
+
+<img width="1342" alt="Screenshot 2024-04-14 at 23 44 39" src="https://github.com/emanuelef/temporal-meetup-demo/assets/48717/1bd18950-581b-4a22-9cac-3bd116f32ca7">
 
 ### Manual
 
