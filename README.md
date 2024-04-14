@@ -28,7 +28,8 @@ Make sure port 8080 is available on your system
 
 The provion API call will generate something like:
 
-<img width="1342" alt="Screenshot 2024-04-14 at 23 44 39" src="https://github.com/emanuelef/temporal-meetup-demo/assets/48717/1bd18950-581b-4a22-9cac-3bd116f32ca7">
+<img width="1341" alt="Screenshot 2024-04-15 at 00 55 08" src="https://github.com/emanuelef/temporal-meetup-demo/assets/48717/6b938493-12ae-4eee-8512-d03ef0450b2b">
+
 
 <img width="681" alt="Screenshot 2024-04-15 at 00 06 14" src="https://github.com/emanuelef/temporal-meetup-demo/assets/48717/2de2018c-a490-477f-bb85-f17c50e40b62">
 
