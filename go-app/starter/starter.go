@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"time"
 
 	_ "github.com/joho/godotenv/autoload"
 	"go.opentelemetry.io/otel/attribute"
@@ -35,7 +34,13 @@ func GetTemporalClient(ctx context.Context) (*TemporalClient, error) {
 	// shortcut, might be using once instead
 	if instance == nil {
 		span.AddEvent("First initialization of the Temporal client")
-		tracingInterceptor, err := opentelemetry.NewTracingInterceptor(opentelemetry.TracerOptions{})
+
+		// Note: A custom SpanContextKey is needed to retrieve the current span in the Workflow definition
+		// The Activities can get the current span from the standard context without the need to use a custom SpanContextKey
+		tracingInterceptor, err := opentelemetry.NewTracingInterceptor(opentelemetry.TracerOptions{
+			SpanContextKey: workflow.SpanContextKey,
+		})
+
 		if err != nil {
 			log.Println("Unable to create interceptor", err)
 			span.AddEvent("Unable to create interceptor")
@@ -87,7 +92,7 @@ func (c *TemporalClient) StartWorkflow(ctx context.Context) (string, error) {
 		ID:        temporalWorkflowId,
 		TaskQueue: TASK_QUEUE,
 		//	RetryPolicy:        retrypolicy,
-		WorkflowRunTimeout: 6 * time.Minute,
+		// WorkflowRunTimeout: 6 * time.Minute,
 	}
 
 	if c.client == nil {

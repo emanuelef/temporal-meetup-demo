@@ -21,6 +21,24 @@
             "down"
         ],
         "problemMatcher": []
+    },
+    {
+        "label": "Start Demo GHCR",
+        "type": "shell",
+        "command": "make",
+        "args": [
+            "start"
+        ],
+        "problemMatcher": []
+    },
+    {
+        "label": "Stop Demo",
+        "type": "shell",
+        "command": "make",
+        "args": [
+            "stop"
+        ],
+        "problemMatcher": []
     }
 ]
 }

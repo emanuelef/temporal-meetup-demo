@@ -32,7 +32,11 @@ func main() {
 		}
 	}()
 
-	tracingInterceptor, err := opentelemetry.NewTracingInterceptor(opentelemetry.TracerOptions{})
+	// Note: A custom SpanContextKey is needed to retrieve the current span in the Workflow definition
+	// The Activities can get the current span from the standard context without the need to use a custom SpanContextKey
+	tracingInterceptor, err := opentelemetry.NewTracingInterceptor(opentelemetry.TracerOptions{
+		SpanContextKey: workflow.SpanContextKey,
+	})
 	if err != nil {
 		log.Fatalln("Unable to create interceptor", err)
 	}

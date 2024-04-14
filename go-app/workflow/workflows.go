@@ -3,13 +3,18 @@ package workflow
 import (
 	"time"
 
+	"github.com/emanuelef/temporal-meetup-demo/go-app/otel_instrumentation"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/otel/trace/noop"
 	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/workflow"
 )
 
 var tracer trace.Tracer
+
+const SpanContextKey = "test-span-context-workflow"
 
 type ServiceWorkflowInput struct {
 	Name     string
@@ -23,7 +28,7 @@ type ServiceWorkflowOutput struct {
 
 func init() {
 	// Name the tracer after the package, or the service if you are in main
-	tracer = otel.Tracer("github.com/emanuelef/temporal-meetup-demo")
+	tracer = otel.Tracer("github.com/emanuelef/temporal-meetup-demo/go-app/workflow")
 }
 
 func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkflowOutput, error) {
@@ -34,19 +39,20 @@ func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkfl
 		Name: service.Name,
 	}
 
-	// TODO: How to get the ctx from the caller to get the span ?
+	span, ok := ctx.Value(SpanContextKey).(trace.Span)
 
-	test1 := ctx.Value("SpanContextKey")
-
-	if test1 != nil {
-		logger.Info("Test")
+	if !ok {
+		span = noop.Span{}
 	}
+
+	span.SetAttributes(attribute.String("Success", "Ok"))
+	span.AddEvent("Prova")
+	otel_instrumentation.AddLogEvent(span, ServiceWorkflowInput{Name: "Good", Metadata: "Day"})
 
 	//extractedBaggage := baggage.FromContext(ctx)
 
 	ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
 		StartToCloseTimeout: 3 * time.Minute,
-		// HeartbeatTimeout:    10 * time.Second,
 	})
 
 	err := workflow.ExecuteActivity(ctx, Activity).Get(ctx, nil)
@@ -54,6 +60,8 @@ func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkfl
 		logger.Error("Activity failed.", "Error", err)
 		return result, err
 	}
+
+	workflow.Sleep(ctx, 10*time.Second)
 
 	retrypolicy := &temporal.RetryPolicy{
 		InitialInterval:    2 * time.Second,
