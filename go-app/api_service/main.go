@@ -19,13 +19,13 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 var tracer trace.Tracer
-
 var notToLogEndpoints = []string{"/health", "/metrics"}
 
 func init() {
@@ -117,6 +117,7 @@ func main() {
 		ctx, childSpan := tracer.Start(c.Request.Context(), "prepare-workflow-payload")
 		defer childSpan.End()
 
+		// Example of an HTTP request needed to prepare the Workflow payload
 		externalURL := "https://pokeapi.co/api/v2/pokemon/ditto"
 		resp, err := otelhttp.Get(ctx, externalURL)
 		if err != nil {
@@ -132,9 +133,49 @@ func main() {
 			return
 		}
 
-		log.Println("OK Temporal client")
+		workflowID, err := clientTemporal.StartWorkflow(c.Request.Context(), starter.Service{})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
 
-		workflowID, err := clientTemporal.StartWorkflow(c.Request.Context())
+		c.JSON(http.StatusAccepted, gin.H{"workflowID": workflowID})
+	})
+
+	r.POST("/provision", func(c *gin.Context) {
+		ctx := c.Request.Context()
+
+		span := trace.SpanFromContext(ctx)
+		ctx, childSpan := tracer.Start(ctx, "prepare-workflow-payload")
+		defer childSpan.End()
+
+		var service starter.Service
+
+		err := c.BindJSON(&service)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		span.SetAttributes(attribute.String("service", service.Name), attribute.String("device.mac", service.DeviceMac))
+
+		// Example of an HTTP request needed to prepare the Workflow payload
+		externalURL := "https://pokeapi.co/api/v2/pokemon/ditto"
+		resp, err := otelhttp.Get(ctx, externalURL)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		_, _ = io.ReadAll(resp.Body)
+
+		clientTemporal, err := starter.GetTemporalClient(ctx)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		workflowID, err := clientTemporal.StartWorkflow(ctx, service)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return

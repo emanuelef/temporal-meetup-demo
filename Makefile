@@ -56,3 +56,9 @@ stop:
 .PHONY: trigger
 trigger:
 	curl localhost:8080/start
+
+.PHONY: service
+service:
+	curl -X POST http://localhost:8080/provision \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "guestNetwork", "deviceMac": "00:A0:C1:D2:E3:F4" }'

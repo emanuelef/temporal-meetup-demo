@@ -14,11 +14,12 @@ import (
 
 var tracer trace.Tracer
 
-const SpanContextKey = "test-span-context-workflow"
+const SpanContextKey = "span-context-key-workflow"
 
 type ServiceWorkflowInput struct {
-	Name     string
-	Metadata string
+	Name      string
+	Metadata  string
+	DeviceMac string
 }
 
 type ServiceWorkflowOutput struct {
@@ -33,7 +34,7 @@ func init() {
 
 func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkflowOutput, error) {
 	logger := workflow.GetLogger(ctx)
-	logger.Info("HelloWorld workflow started", "name", service.Name)
+	logger.Info("Main workflow started", "name", service.Name)
 
 	result := ServiceWorkflowOutput{
 		Name: service.Name,
@@ -45,9 +46,8 @@ func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkfl
 		span = noop.Span{}
 	}
 
-	span.SetAttributes(attribute.String("Success", "Ok"))
-	span.AddEvent("Prova")
-	otel_instrumentation.AddLogEvent(span, ServiceWorkflowInput{Name: "Good", Metadata: "Day"})
+	span.SetAttributes(attribute.String("service", service.Name), attribute.String("device.mac", service.DeviceMac))
+	_ = otel_instrumentation.AddLogEvent(span, service)
 
 	// TODO: How to get the Baggage from workflow.Context ?
 	//extractedBaggage := baggage.FromContext(ctx)
@@ -56,6 +56,10 @@ func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkfl
 		StartToCloseTimeout: 3 * time.Minute,
 	})
 
+	// Simulate task to prepare what is needed to start activities
+	_ = workflow.Sleep(ctx, 300*time.Millisecond)
+	span.AddEvent("Completed Activities preparation")
+
 	err := workflow.ExecuteActivity(ctx, Activity).Get(ctx, nil)
 	if err != nil {
 		logger.Error("Activity failed.", "Error", err)
@@ -63,7 +67,9 @@ func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkfl
 	}
 
 	// TODO: How to generate a child span from workflow.Context ?
-	workflow.Sleep(ctx, 2*time.Second)
+	_ = workflow.Sleep(ctx, 1*time.Second)
+
+	span.AddEvent("Finished using first activity results")
 
 	retrypolicy := &temporal.RetryPolicy{
 		InitialInterval:    2 * time.Second,

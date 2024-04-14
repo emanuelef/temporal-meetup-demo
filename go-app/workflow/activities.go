@@ -34,15 +34,12 @@ func Activity(ctx context.Context, name string) error {
 	// Get current span and add new attributes
 	span := trace.SpanFromContext(ctx)
 
+	// Add attributes from baggage
 	for _, val := range extractedBaggage.Members() {
-		if val.Key() == "original_request_endpoint" {
-			span.SetAttributes(attribute.String(val.Key(), val.Value()))
-		}
+		span.SetAttributes(attribute.String(val.Key(), val.Value()))
 	}
 
-	span.SetAttributes(attribute.Bool("isTrue", true), attribute.String("stringAttr", "Ciao"))
-
-	otel_instrumentation.AddLogEvent(span, ServiceWorkflowInput{Name: "Good", Metadata: "Day"})
+	_ = otel_instrumentation.AddLogEvent(span, ServiceWorkflowInput{Name: "Good", Metadata: "Day"})
 
 	// Create a child span
 	_, childSpan := tracer.Start(ctx, "custom-span")
@@ -54,7 +51,7 @@ func Activity(ctx context.Context, name string) error {
 	for _, val := range []string{"a", "b", "c"} {
 		group.Go(func() error {
 			time.Sleep(time.Duration(10+rand.Intn(30)) * time.Millisecond)
-			_, childSpan := tracer.Start(ctx, "custom-span-"+val)
+			_, childSpan := tracer.Start(ctx, "custom-span-"+val) // no longer an issue with Go 1.22
 			time.Sleep(time.Duration(100+rand.Intn(400)) * time.Millisecond)
 			childSpan.End()
 			return nil
@@ -66,7 +63,7 @@ func Activity(ctx context.Context, name string) error {
 		fmt.Printf("Error: %v\n", err)
 	}
 
-	dynamoClient, err := dynamo.NewDynamoDBClient(ctx, "ciao")
+	dynamoClient, err := dynamo.NewDynamoDBClient(ctx, "services")
 	if err != nil {
 		return err
 	}
@@ -96,7 +93,7 @@ func Activity(ctx context.Context, name string) error {
 	   		return err
 	   	} */
 
-	externalURL := anomalyHostAddress + "/test"
+	externalURL := anomalyHostAddress + "/check"
 	resp, err := otelhttp.Get(ctx, externalURL)
 	if err != nil {
 		return err
@@ -124,7 +121,7 @@ func SecondActivity(ctx context.Context, name string) error {
 
 	time.Sleep(400 * time.Millisecond)
 
-	s3Client, err := s3.NewS3Client(ctx, "ciao")
+	s3Client, err := s3.NewS3Client(ctx, "scripts")
 	if err != nil {
 		return err
 	}

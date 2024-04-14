@@ -51,16 +51,15 @@ app.add_middleware(
 # In-memory cache with a TTL (Time To Live) of 10 days
 cache = TTLCache(maxsize=1000, ttl=864000)
 
-@app.get("/test")
-async def test():
+@app.get("/check")
+async def check():
     current_span = trace.get_current_span()
     current_span.set_attribute("operation.value", 1)
     await asyncio.sleep(0.4)
     current_span.add_event("Gonna try it!")
-    with tracer.start_as_current_span("span-name") as span:
-        span.add_event("Gonna try it!")
+    with tracer.start_as_current_span("check-anomaly"):
         await asyncio.sleep(0.3)
-    return {"message": "Ciao"}
+    return {"message": "Success"}
 
 
 @app.get("/predict")

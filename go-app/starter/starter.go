@@ -20,11 +20,15 @@ import (
 
 const TASK_QUEUE = "MeetupExample"
 
+type Service struct {
+	Name      string `json:"name"`
+	DeviceMac string `json:"deviceMac"`
+}
+
 var instance *TemporalClient
 
 type TemporalClient struct {
 	client client.Client
-	table  string
 }
 
 func GetTemporalClient(ctx context.Context) (*TemporalClient, error) {
@@ -69,16 +73,15 @@ func GetTemporalClient(ctx context.Context) (*TemporalClient, error) {
 
 		instance = &TemporalClient{
 			client: c,
-			table:  "ciao",
 		}
 	}
 
 	return instance, nil
 }
 
-func (c *TemporalClient) StartWorkflow(ctx context.Context) (string, error) {
+func (c *TemporalClient) StartWorkflow(ctx context.Context, service Service) (string, error) {
 	span := trace.SpanFromContext(ctx)
-	span.SetAttributes(attribute.Bool("isTrue", true), attribute.String("stringAttr", "Ciao"))
+	span.SetAttributes(attribute.String("service", service.Name), attribute.String("device.mac", service.DeviceMac))
 
 	/* 	retrypolicy := &temporal.RetryPolicy{
 		InitialInterval:    time.Second,
@@ -86,7 +89,7 @@ func (c *TemporalClient) StartWorkflow(ctx context.Context) (string, error) {
 		MaximumInterval:    time.Second * 100,
 	} */
 
-	temporalWorkflowId := fmt.Sprintf("service-%s", utils.GenerateUUID())
+	temporalWorkflowId := fmt.Sprintf("service-%s-%s", service.Name, utils.GenerateUUID())
 
 	workflowOptions := client.StartWorkflowOptions{
 		ID:        temporalWorkflowId,
@@ -101,14 +104,14 @@ func (c *TemporalClient) StartWorkflow(ctx context.Context) (string, error) {
 	}
 
 	workflowInput := workflow.ServiceWorkflowInput{
-		Name:     "guestWifi",
-		Metadata: "simple payload",
+		Name:      service.Name,
+		Metadata:  "simple payload",
+		DeviceMac: service.DeviceMac,
 	}
 
-	baggage.New()
-
-	m0, _ := baggage.NewMemberRaw("original_request_endpoint", "/start")
-	m1, _ := baggage.NewMemberRaw("pippo", "bar1")
+	// Baggage is propagated to all spans but attributes must be created if needed
+	m0, _ := baggage.NewMemberRaw("service_name", workflowInput.Name)
+	m1, _ := baggage.NewMemberRaw("device_mac", workflowInput.DeviceMac)
 	b, _ := baggage.New(m0, m1)
 	ctx = baggage.ContextWithBaggage(ctx, b)
 
