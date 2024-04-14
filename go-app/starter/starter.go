@@ -44,7 +44,6 @@ func GetTemporalClient(ctx context.Context) (*TemporalClient, error) {
 		tracingInterceptor, err := opentelemetry.NewTracingInterceptor(opentelemetry.TracerOptions{
 			SpanContextKey: workflow.SpanContextKey,
 		})
-
 		if err != nil {
 			log.Println("Unable to create interceptor", err)
 			span.AddEvent("Unable to create interceptor")
@@ -81,7 +80,7 @@ func GetTemporalClient(ctx context.Context) (*TemporalClient, error) {
 
 func (c *TemporalClient) StartWorkflow(ctx context.Context, service Service) (string, error) {
 	span := trace.SpanFromContext(ctx)
-	span.SetAttributes(attribute.String("service", service.Name), attribute.String("device.mac", service.DeviceMac))
+	span.SetAttributes(attribute.String("provisioning", service.Name), attribute.String("device.mac", service.DeviceMac))
 
 	/* 	retrypolicy := &temporal.RetryPolicy{
 		InitialInterval:    time.Second,
@@ -110,7 +109,7 @@ func (c *TemporalClient) StartWorkflow(ctx context.Context, service Service) (st
 	}
 
 	// Baggage is propagated to all spans but attributes must be created if needed
-	m0, _ := baggage.NewMemberRaw("service_name", workflowInput.Name)
+	m0, _ := baggage.NewMemberRaw("provision_name", workflowInput.Name)
 	m1, _ := baggage.NewMemberRaw("device_mac", workflowInput.DeviceMac)
 	b, _ := baggage.New(m0, m1)
 	ctx = baggage.ContextWithBaggage(ctx, b)

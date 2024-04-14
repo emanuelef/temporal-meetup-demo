@@ -46,11 +46,11 @@ func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkfl
 		span = noop.Span{}
 	}
 
-	span.SetAttributes(attribute.String("service", service.Name), attribute.String("device.mac", service.DeviceMac))
+	span.SetAttributes(attribute.String("provisioning", service.Name), attribute.String("device.mac", service.DeviceMac))
 	_ = otel_instrumentation.AddLogEvent(span, service)
 
 	// TODO: How to get the Baggage from workflow.Context ?
-	//extractedBaggage := baggage.FromContext(ctx)
+	// extractedBaggage := baggage.FromContext(ctx)
 
 	ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
 		StartToCloseTimeout: 3 * time.Minute,

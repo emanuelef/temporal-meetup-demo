@@ -25,8 +25,10 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-var tracer trace.Tracer
-var notToLogEndpoints = []string{"/health", "/metrics"}
+var (
+	tracer            trace.Tracer
+	notToLogEndpoints = []string{"/health", "/metrics"}
+)
 
 func init() {
 	tracer = otel.Tracer("github.com/emanuelef/temporal-meetup-demo/go-app/api_service")
@@ -157,7 +159,7 @@ func main() {
 			return
 		}
 
-		span.SetAttributes(attribute.String("service", service.Name), attribute.String("device.mac", service.DeviceMac))
+		span.SetAttributes(attribute.String("provisioning", service.Name), attribute.String("device.mac", service.DeviceMac))
 
 		// Example of an HTTP request needed to prepare the Workflow payload
 		externalURL := "https://pokeapi.co/api/v2/pokemon/ditto"
