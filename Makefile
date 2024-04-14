@@ -48,8 +48,8 @@ create-env:
 .PHONY: stop
 stop:
 	@echo "Stopping Temporal"
-	kill `pgrep -f "temporal server start-dev"`
 	docker compose down --remove-orphans --volumes
+	kill `pgrep -f "temporal server start-dev"`
 	@echo ""
 	@echo "Temporal Meetup Demo Stopped"
 
