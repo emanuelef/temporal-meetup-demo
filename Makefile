@@ -42,7 +42,7 @@ check-env:
 create-env:
 	@echo "Creating or overriding .env file"
 	@read -s -p "Enter your Configuration API key: " apiKey; \
-	sed "s/your_key_here/$$apiKey/" .env.example >.env
+	sed "s/your_key_here/$$apiKey/" .env.example.honeycomb >.env
 	@echo "\n.env file created or overridden with OTel data configuration"
 
 .PHONY: stop
