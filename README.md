@@ -13,10 +13,10 @@ Make sure port 8080 is available on your system
 
 1. Create the .env file with the Honeycomb Configuration API key (one off, only needed once)
 `make create-env`
-2. Start the example
+2. Start the example using Docker images on ghcr
 `make start`
 3. Trigger a Temporal workflow
-`curl localhost:8080/start`
+`make service`
 4. Temporal UI
 `http://localhost:8233/namespaces/default/workflows`
 5. Honeycomb UI
