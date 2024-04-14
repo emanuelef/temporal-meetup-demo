@@ -41,7 +41,7 @@ func main() {
 
 	tp, exp, err := otel_instrumentation.InitializeGlobalTracerProvider(ctx)
 	if err != nil {
-		log.Fatalf("error creating OTeL instrumentation: %v", err)
+		log.Fatalf("error creating OTel instrumentation: %v", err)
 	}
 
 	defer func() {

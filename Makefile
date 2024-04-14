@@ -35,15 +35,15 @@ start: check-env
 .PHONY: check-env
 check-env:
 	@echo "Checking for .env file"
-	@test -f .env && echo ".env file found for OTeL data configuration" || \
-	(echo ".env file is needed to specify where to send OTeL data, run make create-env"; exit 1)
+	@test -f .env && echo ".env file found for OTel data configuration" || \
+	(echo ".env file is needed to specify where to send OTel data, run make create-env"; exit 1)
 
 .PHONY: create-env
 create-env:
 	@echo "Creating or overriding .env file"
 	@read -s -p "Enter your Configuration API key: " apiKey; \
 	sed "s/your_key_here/$$apiKey/" .env.example >.env
-	@echo "\n.env file created or overridden with OTeL data configuration"
+	@echo "\n.env file created or overridden with OTel data configuration"
 
 .PHONY: stop
 stop:
