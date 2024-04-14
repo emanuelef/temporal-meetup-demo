@@ -55,10 +55,11 @@ cache = TTLCache(maxsize=1000, ttl=864000)
 async def test():
     current_span = trace.get_current_span()
     current_span.set_attribute("operation.value", 1)
+    await asyncio.sleep(0.4)
     current_span.add_event("Gonna try it!")
     with tracer.start_as_current_span("span-name") as span:
         span.add_event("Gonna try it!")
-        await asyncio.sleep(2)
+        await asyncio.sleep(0.3)
     return {"message": "Ciao"}
 
 

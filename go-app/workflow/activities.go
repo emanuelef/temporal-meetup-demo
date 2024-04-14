@@ -122,7 +122,7 @@ func SecondActivity(ctx context.Context, name string) error {
 
 	_, _ = io.ReadAll(resp.Body)
 
-	time.Sleep(1 * time.Second)
+	time.Sleep(400 * time.Millisecond)
 
 	s3Client, err := s3.NewS3Client(ctx, "ciao")
 	if err != nil {

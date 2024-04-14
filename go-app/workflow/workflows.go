@@ -49,6 +49,7 @@ func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkfl
 	span.AddEvent("Prova")
 	otel_instrumentation.AddLogEvent(span, ServiceWorkflowInput{Name: "Good", Metadata: "Day"})
 
+	// TODO: How to get the Baggage from workflow.Context ?
 	//extractedBaggage := baggage.FromContext(ctx)
 
 	ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
@@ -61,7 +62,8 @@ func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkfl
 		return result, err
 	}
 
-	workflow.Sleep(ctx, 10*time.Second)
+	// TODO: How to generate a child span from workflow.Context ?
+	workflow.Sleep(ctx, 2*time.Second)
 
 	retrypolicy := &temporal.RetryPolicy{
 		InitialInterval:    2 * time.Second,

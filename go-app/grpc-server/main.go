@@ -46,8 +46,10 @@ func (s *server) SayHello(ctx context.Context, in *protos.HelloRequest) (*protos
 	log.Printf("Received: %v", in.GetGreeting())
 
 	_, childSpan := tracer.Start(ctx, "SayHelloCustom")
-	time.Sleep(400 * time.Millisecond)
-	defer childSpan.End()
+	time.Sleep(600 * time.Millisecond)
+	childSpan.End()
+
+	time.Sleep(200 * time.Millisecond)
 
 	if in.Greeting == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "request missing required field: Greeting")
