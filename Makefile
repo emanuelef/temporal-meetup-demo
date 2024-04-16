@@ -62,3 +62,13 @@ service:
 	curl -X POST http://localhost:8080/provision \
   -H "Content-Type: application/json" \
   -d '{ "name": "guestNetwork", "deviceMac": "00:A0:C1:D2:E3:F4" }'
+
+.PHONY: service-faulty-device
+service-faulty-device:
+	curl -X POST http://localhost:8080/provision \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "guestNetwork", "deviceMac": "FF:BB:CC:11:11:77" }'
+
+.PHONY: run-batch-provisioning
+run-batch-provisioning:
+	./batch_provisioning.sh

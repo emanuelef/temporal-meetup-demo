@@ -43,7 +43,7 @@ func Activity(ctx context.Context, name string) error {
 
 	// Create a child span
 	_, childSpan := tracer.Start(ctx, "custom-span")
-	time.Sleep(300 * time.Millisecond)
+	time.Sleep(time.Duration(300+rand.Intn(200)) * time.Millisecond)
 	childSpan.End()
 
 	group := errgroup.Group{}
@@ -107,9 +107,9 @@ func Activity(ctx context.Context, name string) error {
 	return nil
 }
 
-func SecondActivity(ctx context.Context, name string) error {
+func SecondActivity(ctx context.Context, serviceName, deviceMac string) error {
 	logger := activity.GetLogger(ctx)
-	logger.Info("Activity", "name", name)
+	logger.Info("Activity", "name", serviceName)
 
 	externalURL := "https://pokeapi.co/api/v2/pokemon/ditto"
 	resp, err := otelhttp.Get(ctx, externalURL)
@@ -120,6 +120,11 @@ func SecondActivity(ctx context.Context, name string) error {
 	_, _ = io.ReadAll(resp.Body)
 
 	time.Sleep(400 * time.Millisecond)
+
+	// Simulate a longer than usual operation for 
+	if deviceMac == "FF:BB:CC:11:11:77" {
+		time.Sleep(time.Duration(2600+rand.Intn(1000)) * time.Millisecond)
+	}
 
 	s3Client, err := s3.NewS3Client(ctx, "scripts")
 	if err != nil {

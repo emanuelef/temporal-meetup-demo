@@ -47,13 +47,20 @@ func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkfl
 	}
 
 	span.SetAttributes(attribute.String("provisioning", service.Name), attribute.String("device.mac", service.DeviceMac))
+
+	if service.DeviceMac == "FF:BB:CC:11:11:77" {
+		span.SetAttributes(attribute.String("firmware.version", "1.9"))
+	} else {
+		span.SetAttributes(attribute.String("firmware.version", "2.1"))
+	}
+
 	_ = otel_instrumentation.AddLogEvent(span, service)
 
 	// TODO: How to get the Baggage from workflow.Context ?
 	// extractedBaggage := baggage.FromContext(ctx)
 
 	ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
-		StartToCloseTimeout: 3 * time.Minute,
+		StartToCloseTimeout: 5 * time.Minute,
 	})
 
 	// Simulate task to prepare what is needed to start activities
@@ -79,7 +86,7 @@ func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkfl
 	}
 
 	activityoptions := workflow.ActivityOptions{
-		ScheduleToCloseTimeout: 10 * time.Second,
+		ScheduleToCloseTimeout: 2 * time.Minute,
 		RetryPolicy:            retrypolicy,
 	}
 
@@ -87,7 +94,7 @@ func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkfl
 
 	selector := workflow.NewSelector(ctx)
 
-	secondActivityFuture := workflow.ExecuteActivity(ctx, SecondActivity)
+	secondActivityFuture := workflow.ExecuteActivity(ctx, SecondActivity, service.Name, service.DeviceMac)
 	if err != nil {
 		logger.Error("Second Activity failed.", "Error", err)
 		return result, err
