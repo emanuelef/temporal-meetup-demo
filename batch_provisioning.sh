@@ -37,7 +37,7 @@ echo "Specified MAC address: $device_mac"
 # Send the POST request with the specified MAC address
 send_post_request "$device_mac"
 
-# Loop to run curl 100 times with a sleep of 100 ms in between
+# Loop to run curl 150 times with a sleep of 400 ms in between
 for ((i = 1; i <= 150; i++)); do
     device_mac=$(generate_mac)
     if ((i % 7 == 0)); then
