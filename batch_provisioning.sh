@@ -10,69 +10,40 @@ generate_mac() {
     echo "$mac"
 }
 
-# Generate a random MAC address
-device_mac=$(generate_mac)
-
-# Print the generated MAC address
-echo "Generated MAC address: $device_mac"
-
-# JSON payload with the randomized MAC address
-payload="{ \"name\": \"guestNetwork\", \"deviceMac\": \"$device_mac\" }"
-
-# Send the POST request using curl
-curl -X POST http://localhost:8080/provision \
-    -H "Content-Type: application/json" \
-    -d "$payload"
-
-# Loop to run curl 100 times with a sleep of 100 ms in between
-for ((i = 1; i <= 100; i++)); do
-    # Generate a random MAC address
-    device_mac=$(generate_mac)
-
-    # Print the generated MAC address
-    echo "Generated MAC address: $device_mac"
-
-    # JSON payload with the randomized MAC address
-    payload="{ \"name\": \"guestNetwork\", \"deviceMac\": \"$device_mac\" }"
-
-    # Send the POST request using curl
+# Function to send a POST request with specified MAC address
+send_post_request() {
+    local mac_address="$1"
+    local payload="{ \"name\": \"guestNetwork\", \"deviceMac\": \"$mac_address\" }"
     curl -X POST http://localhost:8080/provision \
         -H "Content-Type: application/json" \
         -d "$payload"
+    echo
+}
 
-    # Sleep for 100 milliseconds
-    sleep 0.1
+# Loop to run curl 100 times with a sleep of 100 ms in between
+for ((i = 1; i <= 100; i++)); do
+    device_mac=$(generate_mac)
+    echo "Generated MAC address: $device_mac"
+    send_post_request "$device_mac"
+    sleep 0.3
 done
 
+# Specify a MAC address
 device_mac="FF:BB:CC:11:11:77"
 
 # Print the specified MAC address
 echo "Specified MAC address: $device_mac"
 
-# JSON payload with the specified MAC address
-payload="{ \"name\": \"guestNetwork\", \"deviceMac\": \"$device_mac\" }"
-
-# Send the POST request using curl
-curl -X POST http://localhost:8080/provision \
-    -H "Content-Type: application/json" \
-    -d "$payload"
+# Send the POST request with the specified MAC address
+send_post_request "$device_mac"
 
 # Loop to run curl 100 times with a sleep of 100 ms in between
-for ((i = 1; i <= 100; i++)); do
-    # Generate a random MAC address
+for ((i = 1; i <= 150; i++)); do
     device_mac=$(generate_mac)
-
-    # Print the generated MAC address
+    if ((i % 7 == 0)); then
+        device_mac="FF:BB:CC:11:11:77" # Set the specified MAC address
+    fi
     echo "Generated MAC address: $device_mac"
-
-    # JSON payload with the randomized MAC address
-    payload="{ \"name\": \"guestNetwork\", \"deviceMac\": \"$device_mac\" }"
-
-    # Send the POST request using curl
-    curl -X POST http://localhost:8080/provision \
-        -H "Content-Type: application/json" \
-        -d "$payload"
-
-    # Sleep for 100 milliseconds
-    sleep 0.1
+    send_post_request "$device_mac"
+    sleep 0.4
 done
