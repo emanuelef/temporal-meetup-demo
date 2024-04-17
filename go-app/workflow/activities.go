@@ -121,7 +121,7 @@ func SecondActivity(ctx context.Context, serviceName, deviceMac string) error {
 
 	time.Sleep(400 * time.Millisecond)
 
-	// Simulate a longer than usual operation for 
+	// Simulate a longer than usual operation for a specific device
 	if deviceMac == "FF:BB:CC:11:11:77" {
 		time.Sleep(time.Duration(2600+rand.Intn(1000)) * time.Millisecond)
 	}
