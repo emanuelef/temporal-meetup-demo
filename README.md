@@ -33,6 +33,10 @@ The provion API call will generate something like:
 
 <img width="681" alt="Screenshot 2024-04-15 at 00 06 14" src="https://github.com/emanuelef/temporal-meetup-demo/assets/48717/2de2018c-a490-477f-bb85-f17c50e40b62">
 
+Bubble Up analysis
+<img width="977" alt="Screenshot 2024-04-17 at 01 24 36" src="https://github.com/emanuelef/temporal-meetup-demo/assets/48717/dd84bf22-bcea-4157-9fd7-6e5fda5dd919">
+
+
 
 ### Manual
 
