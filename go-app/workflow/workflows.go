@@ -3,7 +3,7 @@ package workflow
 import (
 	"time"
 
-	"github.com/emanuelef/temporal-meetup-demo/go-app/otel_instrumentation"
+	// "github.com/emanuelef/temporal-meetup-demo/go-app/otel_instrumentation"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -54,7 +54,7 @@ func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkfl
 		span.SetAttributes(attribute.String("firmware.version", "2.1"))
 	}
 
-	_ = otel_instrumentation.AddLogEvent(span, service)
+	// _ = otel_instrumentation.AddLogEvent(span, service)
 
 	// TODO: How to get the Baggage from workflow.Context ?
 	// extractedBaggage := baggage.FromContext(ctx)
@@ -67,7 +67,7 @@ func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkfl
 	_ = workflow.Sleep(ctx, 300*time.Millisecond)
 	span.AddEvent("Completed Activities preparation")
 
-	err := workflow.ExecuteActivity(ctx, Activity).Get(ctx, nil)
+	err := workflow.ExecuteActivity(ctx, Activity, "configGRE").Get(ctx, nil)
 	if err != nil {
 		logger.Error("Activity failed.", "Error", err)
 		return result, err
@@ -100,7 +100,7 @@ func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkfl
 		return result, err
 	}
 
-	thirdActivityFuture := workflow.ExecuteActivity(ctx, ThirdActivity)
+	thirdActivityFuture := workflow.ExecuteActivity(ctx, ThirdActivity, "configHotspot")
 	if err != nil {
 		logger.Error("Second Activity failed.", "Error", err)
 		return result, err

@@ -36,26 +36,26 @@ func getEnv(key, fallback string) string {
 	return value
 }
 
-// server is used to implement helloworld.GreeterServer.
+// server is used to implement helloworld.DeviceConfiguratorServer.
 type server struct {
-	protos.UnimplementedGreeterServer
+	protos.UnimplementedDeviceConfiguratorServer
 }
 
-// SayHello implements helloworld.GreeterServer
-func (s *server) SayHello(ctx context.Context, in *protos.HelloRequest) (*protos.HelloResponse, error) {
-	log.Printf("Received: %v", in.GetGreeting())
+// UpdateDeviceConfig implements helloworld.DeviceConfiguratorServer
+func (s *server) UpdateDeviceConfig(ctx context.Context, in *protos.DeviceConfig) (*protos.ConfigResult, error) {
+	log.Printf("Received: %v", in.GetConfigWiFi())
 
-	_, childSpan := tracer.Start(ctx, "SayHelloCustom")
+	_, childSpan := tracer.Start(ctx, "UpdateDeviceConfigCustom")
 	time.Sleep(600 * time.Millisecond)
 	childSpan.End()
 
 	time.Sleep(200 * time.Millisecond)
 
-	if in.Greeting == "" {
-		return nil, status.Errorf(codes.InvalidArgument, "request missing required field: Greeting")
+	if in.ConfigWiFi == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "request missing required field: ConfigWiFi")
 	}
 
-	return &protos.HelloResponse{Reply: "Hello " + in.GetGreeting()}, nil
+	return &protos.ConfigResult{Ack: "Hello " + in.GetConfigWiFi()}, nil
 }
 
 func main() {
@@ -82,7 +82,7 @@ func main() {
 	reflection.Register(grpcServer)
 
 	// Register the server
-	protos.RegisterGreeterServer(grpcServer, &server{})
+	protos.RegisterDeviceConfiguratorServer(grpcServer, &server{})
 
 	log.Printf("Starting server on address %s", lis.Addr().String())
 

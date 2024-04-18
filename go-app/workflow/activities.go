@@ -25,9 +25,37 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func Activity(ctx context.Context, name string) error {
+func UpdateDevice(ctx context.Context, name string) error {
+	grpcHost := utils.GetEnv("GRPC_TARGET", "localhost")
+	grpcTarget := fmt.Sprintf("%s:7070", grpcHost)
+
+	// this normally would be a singleton, client creation may be expensive
+	conn, err := grpc.NewClient(grpcTarget,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+	)
+	if err != nil {
+		log.Printf("Did not connect: %v", err)
+		return err
+	}
+
+	defer conn.Close()
+	cli := protos.NewDeviceConfiguratorClient(conn)
+
+	r, err := cli.UpdateDeviceConfig(ctx, &protos.DeviceConfig{ConfigWiFi: name})
+	if err != nil {
+		log.Printf("Error: %v", err)
+		return err
+	}
+
+	log.Printf("ConfigWiFi: %s", r.GetAck())
+
+	return nil
+}
+
+func Activity(ctx context.Context, config string) error {
 	logger := activity.GetLogger(ctx)
-	logger.Info("Activity", "name", name)
+	logger.Info("Activity", "name", config)
 
 	extractedBaggage := baggage.FromContext(ctx)
 
@@ -42,16 +70,22 @@ func Activity(ctx context.Context, name string) error {
 	_ = otel_instrumentation.AddLogEvent(span, ServiceWorkflowInput{Name: "Good", Metadata: "Day"})
 
 	// Create a child span
-	_, childSpan := tracer.Start(ctx, "custom-span")
+	_, childSpan := tracer.Start(ctx, "decrypt-data")
 	time.Sleep(time.Duration(300+rand.Intn(200)) * time.Millisecond)
 	childSpan.End()
 
+	err := UpdateDevice(ctx, config)
+
+	if err != nil {
+		return err
+	}
+
 	group := errgroup.Group{}
 
-	for _, val := range []string{"a", "b", "c"} {
+	for _, val := range []string{"wifi", "firewall"} {
 		group.Go(func() error {
 			time.Sleep(time.Duration(10+rand.Intn(30)) * time.Millisecond)
-			_, childSpan := tracer.Start(ctx, "custom-span-"+val) // no longer an issue with Go 1.22
+			_, childSpan := tracer.Start(ctx, "configuring-"+val) // no longer an issue with Go 1.22
 			time.Sleep(time.Duration(100+rand.Intn(400)) * time.Millisecond)
 			childSpan.End()
 			return nil
@@ -140,29 +174,7 @@ func SecondActivity(ctx context.Context, serviceName, deviceMac string) error {
 	return nil
 }
 
-func ThirdActivity(ctx context.Context, name string) error {
-	grpcHost := utils.GetEnv("GRPC_TARGET", "localhost")
-	grpcTarget := fmt.Sprintf("%s:7070", grpcHost)
-
-	conn, err := grpc.NewClient(grpcTarget,
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
-	)
-	if err != nil {
-		log.Printf("Did not connect: %v", err)
-		return nil
-	}
-
-	defer conn.Close()
-	cli := protos.NewGreeterClient(conn)
-
-	r, err := cli.SayHello(ctx, &protos.HelloRequest{Greeting: "ciao"})
-	if err != nil {
-		log.Printf("Error: %v", err)
-		return nil
-	}
-
-	log.Printf("Greeting: %s", r.GetReply())
-
-	return nil
+func ThirdActivity(ctx context.Context, config string) error {
+	err := UpdateDevice(ctx, config)
+	return err
 }

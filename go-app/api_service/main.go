@@ -99,9 +99,9 @@ func main() {
 		}
 
 		defer conn.Close()
-		cli := protos.NewGreeterClient(conn)
+		cli := protos.NewDeviceConfiguratorClient(conn)
 
-		r, err := cli.SayHello(c.Request.Context(), &protos.HelloRequest{Greeting: "ciao"})
+		r, err := cli.UpdateDeviceConfig(c.Request.Context(), &protos.DeviceConfig{ConfigWiFi: "ciao"})
 		if err != nil {
 			log.Printf("Error: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -110,7 +110,7 @@ func main() {
 			return
 		}
 
-		log.Printf("Greeting: %s", r.GetReply())
+		log.Printf("ConfigWiFi: %s", r.GetAck())
 
 		c.JSON(http.StatusNoContent, gin.H{})
 	})
@@ -150,6 +150,8 @@ func main() {
 		span := trace.SpanFromContext(ctx)
 		ctx, childSpan := tracer.Start(ctx, "prepare-workflow-payload")
 		defer childSpan.End()
+
+		time.Sleep(200 * time.Millisecond)
 
 		var service starter.Service
 

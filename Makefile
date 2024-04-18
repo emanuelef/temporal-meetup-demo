@@ -8,6 +8,13 @@ dev: check-env
 	@echo "Temporal UI http://localhost:8233/namespaces/default/workflows"
 	@echo "make service to start a Temporal Worflow"
 
+.PHONY: dev-no-temporal
+dev-no-temporal: check-env
+	docker compose up --build --force-recreate --remove-orphans --detach
+	@echo "Temporal Meetup Demo Started"
+	@echo "Temporal UI http://localhost:8233/namespaces/default/workflows"
+	@echo "make service to start a Temporal Worflow"
+
 .PHONY: dev-no-worker
 dev-no-worker: check-env
 	@echo "Start Temporal"
