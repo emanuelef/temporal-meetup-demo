@@ -1,5 +1,5 @@
 use actix_web::{web, App, HttpResponse, HttpServer};
-use std::{io, str::FromStr, env};
+use std::{io, str::FromStr};
 use tracing::{debug, info};
 use tracing_actix_web::TracingLogger;
 use tracing_subscriber::prelude::*;

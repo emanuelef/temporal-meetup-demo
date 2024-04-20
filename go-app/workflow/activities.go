@@ -108,24 +108,9 @@ func Activity(ctx context.Context, config string) error {
 		return err
 	}
 
-	/* 	externalURL := "http://rust-app:8080/hello"
-	   	resp, err := otelhttp.Get(ctx, externalURL)
-
-	   	if err != nil {
-	   		return err
-	   	}
-
-	   	_, _ = io.ReadAll(resp.Body) */
-
 	host := utils.GetEnv("ANOMALY_HOST", "localhost")
 	port := utils.GetEnv("ANOMALY_PORT", "8086")
 	anomalyHostAddress := fmt.Sprintf("http://%s", net.JoinHostPort(host, port))
-
-	/* 	externalURL := anomalyHostAddress + "/predict?repo=databricks/dbrx"
-	   	resp, err := otelhttp.Get(ctx, externalURL)
-	   	if err != nil {
-	   		return err
-	   	} */
 
 	externalURL := anomalyHostAddress + "/check"
 	resp, err := otelhttp.Get(ctx, externalURL)
