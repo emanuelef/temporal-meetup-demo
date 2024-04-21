@@ -6,6 +6,7 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
@@ -27,6 +28,7 @@ func InitializeGlobalTracerProvider(ctx context.Context) (*sdktrace.TracerProvid
 		sdktrace.WithResource(resource.NewWithAttributes(
 			semconv.SchemaURL,
 			semconv.ServiceVersion("0.0.1"),
+			attribute.String("environment", "test"),
 		)),
 	)
 	otel.SetTracerProvider(tp)
