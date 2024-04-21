@@ -74,7 +74,7 @@ func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkfl
 	}
 
 	// TODO: How to generate a child span from workflow.Context ?
-	_ = workflow.Sleep(ctx, 1*time.Second)
+	_ = workflow.Sleep(ctx, 500*time.Millisecond)
 
 	span.AddEvent("Finished using first activity results")
 
