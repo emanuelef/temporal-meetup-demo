@@ -28,13 +28,13 @@ Make sure port 8080 is available on your system
 
 The provion API call will generate something like:
 
-<img width="1341" alt="Screenshot 2024-04-15 at 00 55 08" src="https://github.com/emanuelef/temporal-meetup-demo/assets/48717/6b938493-12ae-4eee-8512-d03ef0450b2b">
+<img width="1444" alt="Screenshot 2024-04-21 at 18 57 02" src="https://github.com/emanuelef/temporal-meetup-demo/assets/48717/fe3e8670-7953-48a9-a130-00d617184298">
 
-
-<img width="681" alt="Screenshot 2024-04-15 at 00 06 14" src="https://github.com/emanuelef/temporal-meetup-demo/assets/48717/2de2018c-a490-477f-bb85-f17c50e40b62">
+<img width="692" alt="Screenshot 2024-04-21 at 19 04 18" src="https://github.com/emanuelef/temporal-meetup-demo/assets/48717/6911983c-eb7a-4618-a299-86cdab83f215">
 
 Bubble Up analysis
-<img width="977" alt="Screenshot 2024-04-17 at 01 24 36" src="https://github.com/emanuelef/temporal-meetup-demo/assets/48717/dd84bf22-bcea-4157-9fd7-6e5fda5dd919">
+
+<img width="1405" alt="Screenshot 2024-04-21 at 19 07 14" src="https://github.com/emanuelef/temporal-meetup-demo/assets/48717/845df360-cabf-4eec-8576-508018209c0c">
 
 
 
