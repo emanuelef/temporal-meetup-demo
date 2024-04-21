@@ -53,7 +53,7 @@ func UpdateDevice(ctx context.Context, name string) error {
 	return nil
 }
 
-func Activity(ctx context.Context, config string) error {
+func FirstActivity(ctx context.Context, config string) error {
 	logger := activity.GetLogger(ctx)
 	logger.Info("Activity", "name", config)
 

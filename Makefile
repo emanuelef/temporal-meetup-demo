@@ -68,7 +68,7 @@ trigger:
 service:
 	curl -X POST http://localhost:8080/provision \
   -H "Content-Type: application/json" \
-  -d '{ "name": "guestNetwork", "deviceMac": "00:A0:C1:D2:E3:F4" }'
+  -d '{ "name": "guestNetwork", "deviceMac": "00:A0:C1:D2:E3:F4" }' | jq
 
 .PHONY: service-faulty-device
 service-faulty-device:

@@ -58,8 +58,8 @@ func main() {
 
 	w := worker.New(c, TASK_QUEUE, worker.Options{})
 
-	w.RegisterWorkflow(workflow.Workflow)
-	w.RegisterActivity(workflow.Activity)
+	w.RegisterWorkflow(workflow.ProvisioningWorkflow)
+	w.RegisterActivity(workflow.FirstActivity)
 	w.RegisterActivity(workflow.SecondActivity)
 	w.RegisterActivity(workflow.ThirdActivity)
 

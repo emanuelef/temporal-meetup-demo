@@ -114,7 +114,7 @@ func (c *TemporalClient) StartWorkflow(ctx context.Context, service Service) (st
 	b, _ := baggage.New(m0, m1)
 	ctx = baggage.ContextWithBaggage(ctx, b)
 
-	we, err := c.client.ExecuteWorkflow(ctx, workflowOptions, workflow.Workflow, workflowInput)
+	we, err := c.client.ExecuteWorkflow(ctx, workflowOptions, workflow.ProvisioningWorkflow, workflowInput)
 	if err != nil {
 		log.Println("Unable to execute workflow", err)
 		span.AddEvent("Unable to execute workflow")

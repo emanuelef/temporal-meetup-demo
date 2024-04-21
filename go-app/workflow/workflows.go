@@ -32,7 +32,7 @@ func init() {
 	tracer = otel.Tracer("github.com/emanuelef/temporal-meetup-demo/go-app/workflow")
 }
 
-func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkflowOutput, error) {
+func ProvisioningWorkflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkflowOutput, error) {
 	logger := workflow.GetLogger(ctx)
 	logger.Info("Main workflow started", "name", service.Name)
 
@@ -67,7 +67,7 @@ func Workflow(ctx workflow.Context, service ServiceWorkflowInput) (ServiceWorkfl
 	_ = workflow.Sleep(ctx, 300*time.Millisecond)
 	span.AddEvent("Completed Activities preparation")
 
-	err := workflow.ExecuteActivity(ctx, Activity, "configGRE").Get(ctx, nil)
+	err := workflow.ExecuteActivity(ctx, FirstActivity, "configGRE").Get(ctx, nil)
 	if err != nil {
 		logger.Error("Activity failed.", "Error", err)
 		return result, err
