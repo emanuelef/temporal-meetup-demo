@@ -95,6 +95,9 @@ func (c *TemporalClient) StartWorkflow(ctx context.Context, service Service) (st
 		TaskQueue: TASK_QUEUE,
 		//	RetryPolicy:        retrypolicy,
 		// WorkflowRunTimeout: 6 * time.Minute,
+		SearchAttributes: map[string]any{
+			"DeviceMac": service.DeviceMac,
+		},
 	}
 
 	if c.client == nil {
