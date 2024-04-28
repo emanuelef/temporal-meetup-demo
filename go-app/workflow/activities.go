@@ -75,7 +75,6 @@ func FirstActivity(ctx context.Context, config string) error {
 	childSpan.End()
 
 	err := UpdateDevice(ctx, config)
-
 	if err != nil {
 		return err
 	}

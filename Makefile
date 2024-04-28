@@ -4,6 +4,7 @@ dev: check-env
 	@echo "Start Temporal"
 	temporal server start-dev >/dev/null 2>&1 &
 	docker compose up --build --force-recreate --remove-orphans --detach
+	temporal operator search-attribute create -n default --name DeviceMac --type Keyword
 	@echo "Temporal Meetup Demo Started"
 	@echo "Temporal UI http://localhost:8233/namespaces/default/workflows"
 	@echo "make service to start a Temporal Worflow"
@@ -20,6 +21,7 @@ dev-no-worker: check-env
 	@echo "Start Temporal"
 	temporal server start-dev >/dev/null 2>&1 &
 	docker compose -f docker-compose-no-worker.yml up --build --force-recreate --remove-orphans --detach
+	temporal operator search-attribute create -n default --name DeviceMac --type Keyword
 	@echo "Temporal Meetup Demo Started"
 	@echo "Temporal UI http://localhost:8233/namespaces/default/workflows"
 	@echo "curl localhost:8080/start to start a Temporal Worflow"
@@ -35,6 +37,7 @@ start: check-env
 	@echo "Start Temporal"
 	temporal server start-dev >/dev/null 2>&1 &
 	docker compose -f docker-compose.yml up --pull always --force-recreate --remove-orphans --detach
+	temporal operator search-attribute create -n default --name DeviceMac --type Keyword
 	@echo "Temporal Meetup Demo Started"
 	@echo "Temporal UI http://localhost:8233/namespaces/default/workflows"
 	@echo "make service to start a Temporal Worflow"
