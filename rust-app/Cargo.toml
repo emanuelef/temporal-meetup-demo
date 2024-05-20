@@ -10,7 +10,7 @@ actix-service = "2.0.2"
 opentelemetry = { version = "=0.21", default-features = false, features = [
     "trace",
 ] }
-opentelemetry-otlp = { version = "=0.14", features = [
+opentelemetry-otlp = { version = "=0.16", features = [
     "reqwest-client",
     "reqwest-rustls",
     "http-proto",
